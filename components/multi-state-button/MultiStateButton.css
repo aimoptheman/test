@@ -1,0 +1,73 @@
+/* ============================================================
+   MultiStateButton — default styles
+   Override any variable in your own stylesheet to theme it.
+   ============================================================ */
+
+:root {
+  --msb-size:          3rem;
+  --msb-font-size:     1.5rem;
+  --msb-padding:       0.5rem 1rem;
+  --msb-border:        2px solid #ccc;
+  --msb-radius:        0.5rem;
+  --msb-bg:            #fff;
+  --msb-bg-hover:      #f3f3f3;
+  --msb-shadow:        0 2px 6px rgba(0, 0, 0, 0.12);
+  --msb-focus-color:   #4f8ef7;
+  --msb-transition:    background-color 0.15s ease;
+}
+
+.msb {
+  display:                  inline-flex;
+  align-items:              center;
+  justify-content:          center;
+  min-width:                var(--msb-size);
+  min-height:               var(--msb-size);
+  padding:                  var(--msb-padding);
+  border:                   var(--msb-border);
+  border-radius:            var(--msb-radius);
+  background:               var(--msb-bg);
+  box-shadow:               var(--msb-shadow);
+  cursor:                   pointer;
+  font-size:                var(--msb-font-size);
+  line-height:              1;
+  /* Prevent double-tap zoom on iOS / Android */
+  touch-action:             manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select:              none;
+  transition:               var(--msb-transition);
+}
+
+.msb:hover {
+  background: var(--msb-bg-hover);
+}
+
+.msb:active {
+  transform: scale(0.93);
+}
+
+/* Accessible keyboard focus ring */
+.msb:focus-visible {
+  outline:        3px solid var(--msb-focus-color);
+  outline-offset: 3px;
+}
+
+/* Image state */
+.msb__img {
+  display:    block;
+  width:      var(--msb-size);
+  height:     var(--msb-size);
+  object-fit: contain;
+  border-radius: calc(var(--msb-radius) - 2px);
+}
+
+/* ── Pop animation ──────────────────────────────────────────── */
+@keyframes msb-pop {
+  0%   { transform: scale(1);    }
+  35%  { transform: scale(1.28); }
+  65%  { transform: scale(0.93); }
+  100% { transform: scale(1);    }
+}
+
+.msb--pop {
+  animation: msb-pop 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
