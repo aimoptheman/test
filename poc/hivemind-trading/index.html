@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hivemind Trading — The Collective Intelligence of Traders</title>
+  <meta name="description" content="Join thousands of traders sharing signals, sentiment, and strategy. The hivemind knows what your broker doesn't.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #080c12;
+      --card:   #0e141f;
+      --border: #1e2a3a;
+      --text:   #e2e8f0;
+      --muted:  #64748b;
+      --green:  #22c55e;
+      --red:    #ef4444;
+      --gold:   #f59e0b;
+      --blue:   #3b82f6;
+      --accent: #10b981;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0a1628 0%, #080c12 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,.08) 0%, transparent 70%);
+    }
+    .hero * { position: relative; }
+
+    .tagline-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(16,185,129,.1);
+      border: 1px solid rgba(16,185,129,.3);
+      color: var(--accent);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .3rem .9rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    .pulse {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .4; transform: scale(1.5); }
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    h1 span { color: var(--accent); }
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* waitlist form */
+    .waitlist-form {
+      display: flex;
+      gap: .5rem;
+      max-width: 440px;
+      margin: 0 auto 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .waitlist-form input {
+      flex: 1;
+      min-width: 200px;
+      padding: .75rem 1.1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: .95rem;
+      font-family: inherit;
+    }
+    .waitlist-form input::placeholder { color: var(--muted); }
+    .waitlist-form input:focus { outline: none; border-color: var(--accent); }
+    .waitlist-form button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: .75rem 1.5rem;
+      font-size: .95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .waitlist-form button:hover { background: #0d9e6f; }
+
+    .sub-count { font-size: .8rem; color: var(--muted); }
+    .sub-count strong { color: var(--text); }
+
+    /* ── stats strip ── */
+    .stats-strip {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      padding: 2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 900; color: var(--accent); }
+    .stat-lbl { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+    /* ── main ── */
+    main { max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem; }
+    section { margin-bottom: 4rem; }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    /* ── fear & greed widget ── */
+    .fg-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .fg-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    .fg-number { font-size: 5rem; font-weight: 900; line-height: 1; }
+    .fg-class  { font-size: 1.2rem; font-weight: 700; }
+    .fg-bar-wrap { width: 100%; max-width: 360px; height: 10px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .fg-bar { height: 100%; border-radius: 999px; transition: width 1s; }
+    .fg-desc { font-size: .85rem; color: var(--muted); text-align: center; max-width: 360px; }
+    .fg-powered { font-size: .7rem; color: var(--muted); }
+
+    /* ── feature grid ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .feature-icon { font-size: 1.5rem; margin-bottom: .75rem; display: block; }
+    .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+    .feature-desc { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── platform links ── */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .platform-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color .15s, transform .15s;
+      display: block;
+    }
+    .platform-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .platform-name  { font-weight: 700; margin-bottom: .25rem; }
+    .platform-offer { font-size: .8rem; color: var(--accent); margin-bottom: .25rem; }
+    .platform-note  { font-size: .75rem; color: var(--muted); }
+
+    /* ── cta banner ── */
+    .cta-banner {
+      background: linear-gradient(135deg, #0a2218 0%, #0e1a14 100%);
+      border: 1px solid rgba(16,185,129,.3);
+      border-radius: 14px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .cta-banner h3 { font-size: 1.6rem; font-weight: 800; margin-bottom: .5rem; }
+    .cta-banner p  { color: var(--muted); margin-bottom: 1.5rem; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .75rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="tagline-chip"><div class="pulse"></div> Early Access — Join the waitlist</div>
+  <h1>The <span>Hivemind</span><br>Knows the Move</h1>
+  <p class="hero-sub">Collective intelligence from thousands of traders — signals, sentiment, and strategy. All in one place. All free.</p>
+
+  <form class="waitlist-form" onsubmit="joinWaitlist(event)">
+    <input type="email" placeholder="your@email.com" required id="wl-email">
+    <button type="submit">Join the Hivemind</button>
+  </form>
+  <div id="wl-msg" style="display:none;margin-bottom:.75rem;color:var(--accent);font-size:.9rem;font-weight:600;"></div>
+  <div class="sub-count">Join <strong id="sub-num">2,847</strong> traders already on the list</div>
+</div>
+
+<div class="stats-strip">
+  <div class="stat"><div class="stat-num">2,847</div><div class="stat-lbl">Waitlist</div></div>
+  <div class="stat"><div class="stat-num">$0</div><div class="stat-lbl">Cost to join</div></div>
+  <div class="stat"><div class="stat-num">24/7</div><div class="stat-lbl">Market pulse</div></div>
+  <div class="stat"><div class="stat-num">Q3</div><div class="stat-lbl">Launch</div></div>
+</div>
+
+<main>
+
+  <!-- ── Live Sentiment ── -->
+  <section id="sentiment">
+    <h2>📡 Live Market Sentiment</h2>
+    <div class="fg-card">
+      <div class="fg-label">Crypto Fear &amp; Greed Index — live</div>
+      <div class="fg-number" id="fg-num">—</div>
+      <div class="fg-class" id="fg-class">Loading…</div>
+      <div class="fg-bar-wrap"><div class="fg-bar" id="fg-bar" style="width:0%"></div></div>
+      <div class="fg-desc" id="fg-desc">Fetching current market sentiment data…</div>
+      <div class="fg-powered">Powered by alternative.me · updates every 24h</div>
+    </div>
+    <p style="color:var(--muted);font-size:.85rem;">
+      This is just one signal. The hivemind aggregates dozens more — Reddit sentiment, options flow, whale wallet moves, and community consensus — to give you the full picture.
+    </p>
+  </section>
+
+  <!-- ── What You Get ── -->
+  <section id="features">
+    <h2>🧠 What Hivemind Gives You</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <div class="feature-title">Aggregated Signals</div>
+        <div class="feature-desc">We pull sentiment from Reddit, Twitter, Discord, and on-chain data and surface what the crowd actually thinks — not what pundits say.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🐋</span>
+        <div class="feature-title">Whale Watching</div>
+        <div class="feature-desc">When large wallets move, you know about it first. Smart money leaves footprints. We read them.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📬</span>
+        <div class="feature-title">Weekly Digest</div>
+        <div class="feature-desc">One email per week. The signals that mattered, the calls the hivemind got right, and what to watch next week.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🤝</span>
+        <div class="feature-title">Copy Trading Radar</div>
+        <div class="feature-desc">Track the top-performing traders across platforms. See what they're buying before it shows up on your feed.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🆓</span>
+        <div class="feature-title">Free Tier — Always</div>
+        <div class="feature-desc">Core signals and the weekly digest will always be free. No credit card. No 14-day trial that forgets to warn you.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔒</span>
+        <div class="feature-title">No Hype. No Pumps.</div>
+        <div class="feature-desc">We are not your financial advisor. We are not pumping bags. We are just showing you what the data says. You decide.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Platforms ── -->
+  <section id="platforms">
+    <h2>🚀 Start Trading Today</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.25rem;">While you wait for Hivemind to launch, these platforms are where the signals actually play out. We may earn a commission if you sign up — at no cost to you.</p>
+    <div class="platform-grid">
+      <a class="platform-card" href="https://www.etoro.com/trading/copy-trading/" target="_blank" rel="noopener">
+        <div class="platform-name">eToro</div>
+        <div class="platform-offer">Copy top traders automatically</div>
+        <div class="platform-note">67% of retail CFD accounts lose money</div>
+      </a>
+      <a class="platform-card" href="https://www.coinbase.com" target="_blank" rel="noopener">
+        <div class="platform-name">Coinbase</div>
+        <div class="platform-offer">$10 bonus on first trade</div>
+        <div class="platform-note">Largest US crypto exchange</div>
+      </a>
+      <a class="platform-card" href="https://www.webull.com" target="_blank" rel="noopener">
+        <div class="platform-name">Webull</div>
+        <div class="platform-offer">Up to 75 free fractional shares</div>
+        <div class="platform-note">Stocks, options, crypto — zero commission</div>
+      </a>
+      <a class="platform-card" href="https://www.tastytrade.com" target="_blank" rel="noopener">
+        <div class="platform-name">tastytrade</div>
+        <div class="platform-offer">Options-first platform</div>
+        <div class="platform-note">Built for active traders</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section>
+    <div class="cta-banner">
+      <h3>Ready to trade smarter?</h3>
+      <p>Join the waitlist. Get early access. The hivemind launches Q3 2025.</p>
+      <form class="waitlist-form" style="margin:0 auto 0" onsubmit="joinWaitlist(event)">
+        <input type="email" placeholder="your@email.com" required id="wl-email-2">
+        <button type="submit">Count Me In</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>hivemind.trading — <a href="#">Terms</a> · <a href="#">Privacy</a></p>
+  <p style="margin-top:.4rem;">Not financial advice. Trading involves risk. We use affiliate links — if you sign up for a partner platform we may earn a commission at no cost to you.</p>
+</footer>
+
+<script>
+// ── Fear & Greed live data ─────────────────────────────────────────────────
+async function loadFG() {
+  try {
+    const res = await fetch('https://api.alternative.me/fng/?limit=1');
+    const data = await res.json();
+    const d = data.data[0];
+    const val = parseInt(d.value, 10);
+    const cls = d.value_classification;
+
+    document.getElementById('fg-num').textContent = val;
+    document.getElementById('fg-class').textContent = cls;
+
+    const bar = document.getElementById('fg-bar');
+    let colour = '#ef4444';
+    if (val >= 75) colour = '#22c55e';
+    else if (val >= 55) colour = '#84cc16';
+    else if (val >= 45) colour = '#f59e0b';
+    else if (val >= 25) colour = '#f97316';
+    bar.style.background = colour;
+    bar.style.width = val + '%';
+
+    document.getElementById('fg-num').style.color = colour;
+    document.getElementById('fg-class').style.color = colour;
+
+    const descs = {
+      'Extreme Fear': 'The market is panicking. Historically a buying opportunity — but tread carefully.',
+      'Fear': 'Sellers are in control. Sentiment is negative. The hivemind is watching closely.',
+      'Neutral': 'Mixed signals. Neither bulls nor bears have conviction. Wait for a clearer read.',
+      'Greed': 'Optimism is building. Momentum is up. Watch for overextension.',
+      'Extreme Greed': 'The crowd is euphoric. This is usually when smart money starts taking profits.'
+    };
+    document.getElementById('fg-desc').textContent = descs[cls] || `Current reading: ${cls}.`;
+  } catch(e) {
+    document.getElementById('fg-class').textContent = 'Unavailable';
+    document.getElementById('fg-desc').textContent = 'Could not load live data. Check back shortly.';
+  }
+}
+
+// ── Waitlist ───────────────────────────────────────────────────────────────
+let count = 2847;
+function joinWaitlist(e) {
+  e.preventDefault();
+  count++;
+  document.querySelectorAll('#sub-num, .stat-num').forEach((el, i) => {
+    if (i === 0) el.textContent = count.toLocaleString();
+  });
+  const msg = document.getElementById('wl-msg');
+  if (msg) {
+    msg.style.display = 'block';
+    msg.textContent = '✅ You\'re on the list. We\'ll email you when we launch.';
+  }
+  document.querySelectorAll('#wl-email, #wl-email-2').forEach(el => el.value = '');
+}
+
+loadFG();
+</script>
+</body>
+</html>
