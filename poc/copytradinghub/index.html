@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copy Trading Hub — Best Copy Trading Platforms Reviewed</title>
+  <meta name="description" content="Independent reviews of the best copy trading platforms. Compare eToro, Tradeo, NAGA, and ZuluTrade — then choose the one that fits your goals.">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f9fafb;--card:#fff;--border:#e5e7eb;--text:#111827;
+      --muted:#6b7280;--green:#16a34a;--blue:#2563eb;--gold:#d97706;
+      --red:#dc2626;--dark:#030712;
+    }
+    body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;line-height:1.6}
+
+    /* ── hero ── */
+    .hero{background:var(--dark);color:#fff;padding:4rem 1.5rem 3.5rem;text-align:center}
+    .hero-chip{display:inline-block;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#86efac;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .85rem;border-radius:999px;margin-bottom:1.25rem}
+    h1{font-size:clamp(1.9rem,5vw,3rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:.75rem}
+    h1 span{color:#4ade80}
+    .hero-sub{color:#9ca3af;font-size:1rem;max-width:520px;margin:0 auto 2.5rem;line-height:1.65}
+    .hero-stats{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+    .h-stat{text-align:center}
+    .h-num{font-size:1.8rem;font-weight:900;color:#4ade80;display:block}
+    .h-lbl{font-size:.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:.08em}
+
+    /* ── main ── */
+    main{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
+    h2{font-size:1.4rem;font-weight:800;margin-bottom:1.25rem;color:var(--text)}
+
+    /* ── comparison table ── */
+    .compare-wrap{overflow-x:auto;margin-bottom:3rem}
+    table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;font-size:.88rem}
+    thead{background:var(--dark);color:#fff}
+    th,td{padding:.9rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    th{font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:#f9fafb}
+    .rank-badge{display:inline-block;background:#d1fae5;color:#065f46;font-weight:800;font-size:.7rem;padding:.15rem .5rem;border-radius:999px}
+    .tag{display:inline-block;font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;margin-left:.3rem}
+    .tag-best{background:#d1fae5;color:#065f46}
+    .tag-high{background:#fee2e2;color:#991b1b}
+    .stars{color:var(--gold)}
+    .cta-cell a{display:inline-block;background:var(--green);color:#fff;font-size:.78rem;font-weight:700;padding:.4rem .9rem;border-radius:7px;text-decoration:none;white-space:nowrap}
+    .cta-cell a:hover{background:#15803d}
+
+    /* ── platform cards ── */
+    .platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;margin-bottom:3rem}
+    .platform-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .2s}
+    .platform-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+    .card-top{padding:1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+    .card-name{font-size:1.15rem;font-weight:800}
+    .card-stars{color:var(--gold);font-size:.85rem}
+    .card-body{padding:1.25rem}
+    .card-tagline{font-size:.88rem;color:var(--muted);margin-bottom:1rem;line-height:1.5}
+    .pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;font-size:.78rem}
+    .pro-item::before{content:'✓ ';color:var(--green);font-weight:700}
+    .con-item::before{content:'✗ ';color:var(--red);font-weight:700}
+    .pro-item,.con-item{color:var(--text);line-height:1.4}
+    .commission-note{font-size:.72rem;color:var(--muted);margin-bottom:.9rem;background:#f9fafb;padding:.4rem .6rem;border-radius:6px;border-left:3px solid var(--border)}
+    .card-cta{display:block;width:100%;text-align:center;background:var(--dark);color:#fff;font-weight:700;font-size:.88rem;padding:.65rem;border-radius:9px;text-decoration:none;transition:background .15s}
+    .card-cta:hover{background:#1f2937}
+    .card-cta.primary{background:var(--green)}
+    .card-cta.primary:hover{background:#15803d}
+    .best-badge{position:absolute;top:.75rem;right:.75rem;background:var(--gold);color:#fff;font-size:.65rem;font-weight:800;padding:.2rem .6rem;border-radius:999px;text-transform:uppercase;letter-spacing:.06em}
+    .card-wrap{position:relative}
+
+    /* ── faq ── */
+    .faq{margin-bottom:3rem}
+    .faq-item{border-bottom:1px solid var(--border);padding:1.1rem 0}
+    .faq-q{font-weight:700;margin-bottom:.4rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+    .faq-q::after{content:'+';font-size:1.1rem;color:var(--muted);transition:transform .2s}
+    .faq-item.open .faq-q::after{content:'−'}
+    .faq-a{font-size:.88rem;color:var(--muted);display:none;line-height:1.7;padding-top:.5rem}
+    .faq-item.open .faq-a{display:block}
+
+    /* ── disclaimer ── */
+    .disclaimer{background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:1.1rem;font-size:.78rem;color:#78350f;margin-bottom:2rem;line-height:1.6}
+
+    footer{text-align:center;padding:2rem;color:var(--muted);font-size:.75rem;border-top:1px solid var(--border)}
+    footer a{color:var(--muted)}
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-chip">✅ Independent Reviews — Updated Monthly</div>
+  <h1>Find Your <span>Copy Trading</span><br>Platform</h1>
+  <p class="hero-sub">We tested 8 copy trading platforms so you don't have to. Here's what actually matters: fees, copy quality, and how much the top traders actually make.</p>
+  <div class="hero-stats">
+    <div class="h-stat"><span class="h-num">8</span><span class="h-lbl">Platforms tested</span></div>
+    <div class="h-stat"><span class="h-num">4</span><span class="h-lbl">Worth your time</span></div>
+    <div class="h-stat"><span class="h-num">$0</span><span class="h-lbl">Cost to open accounts</span></div>
+  </div>
+</div>
+
+<main>
+
+  <section style="margin-bottom:2.5rem">
+    <div class="disclaimer">
+      ⚠️ <strong>Risk warning:</strong> Copy trading and CFDs involve significant risk. Most retail investor accounts lose money when trading CFDs. This is not financial advice — it is editorial content. We may earn a commission if you sign up via our links, at no extra cost to you.
+    </div>
+  </section>
+
+  <!-- ── Quick comparison ── -->
+  <section style="margin-bottom:3rem">
+    <h2>Quick Comparison</h2>
+    <div class="compare-wrap">
+      <table>
+        <thead>
+          <tr><th>Platform</th><th>Best for</th><th>Min. deposit</th><th>Copiers fee</th><th>Our rating</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>eToro</strong> <span class="rank-badge">#1</span></td>
+            <td>Beginners <span class="tag tag-best">Best overall</span></td>
+            <td>$50–$200</td>
+            <td>None — spread only</td>
+            <td class="stars">★★★★★</td>
+            <td class="cta-cell"><a href="https://www.etoro.com/trading/copy-trading/" target="_blank" rel="noopener">Try eToro</a></td>
+          </tr>
+          <tr>
+            <td><strong>ZuluTrade</strong></td>
+            <td>Signal variety</td>
+            <td>$0 (broker dependent)</td>
+            <td>Spread markup</td>
+            <td class="stars">★★★★☆</td>
+            <td class="cta-cell"><a href="https://www.zulutrade.com" target="_blank" rel="noopener">Try ZuluTrade</a></td>
+          </tr>
+          <tr>
+            <td><strong>NAGA</strong></td>
+            <td>Social features</td>
+            <td>$50</td>
+            <td>None</td>
+            <td class="stars">★★★☆☆</td>
+            <td class="cta-cell"><a href="https://naga.com" target="_blank" rel="noopener">Try NAGA</a></td>
+          </tr>
+          <tr>
+            <td><strong>Tradeo</strong></td>
+            <td>MT4 users</td>
+            <td>$250</td>
+            <td>Performance fee possible</td>
+            <td class="stars">★★★☆☆</td>
+            <td class="cta-cell"><a href="https://tradeo.com" target="_blank" rel="noopener">Try Tradeo</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Platform cards ── -->
+  <section style="margin-bottom:3rem">
+    <h2>Platform Reviews</h2>
+    <div class="platform-grid">
+
+      <div class="card-wrap">
+        <div class="best-badge">⭐ Best overall</div>
+        <div class="platform-card">
+          <div class="card-top">
+            <div>
+              <div class="card-name">eToro</div>
+              <div class="card-stars">★★★★★</div>
+            </div>
+            <div style="font-size:.7rem;color:var(--muted);text-align:right">30M+ users<br>Founded 2007</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tagline">The biggest copy trading platform in the world. Easy to use, transparent performance stats, and a massive pool of top traders to copy.</div>
+            <div class="pros-cons">
+              <div class="pro-item">No copy trading fee</div>
+              <div class="con-item">Withdrawal fee ($5)</div>
+              <div class="pro-item">1,000+ copyable traders</div>
+              <div class="con-item">CFDs only in UK/EU</div>
+              <div class="pro-item">Regulated (FCA, CySEC)</div>
+              <div class="con-item">Spreads can be wide</div>
+            </div>
+            <div class="commission-note">We may earn up to $200 per funded account referred via our link.</div>
+            <a class="card-cta primary" href="https://www.etoro.com/trading/copy-trading/" target="_blank" rel="noopener">Open free account →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="platform-card">
+          <div class="card-top">
+            <div>
+              <div class="card-name">ZuluTrade</div>
+              <div class="card-stars">★★★★☆</div>
+            </div>
+            <div style="font-size:.7rem;color:var(--muted);text-align:right">100K+ traders<br>Founded 2007</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tagline">The most signal providers of any platform. Works with multiple brokers, so you keep your existing account.</div>
+            <div class="pros-cons">
+              <div class="pro-item">Broker-agnostic</div>
+              <div class="con-item">Complex interface</div>
+              <div class="pro-item">Huge trader selection</div>
+              <div class="con-item">Signal quality varies</div>
+              <div class="pro-item">Automator (rules engine)</div>
+              <div class="con-item">Spread markup cost</div>
+            </div>
+            <div class="commission-note">Commission earned on qualifying referrals — at no cost to you.</div>
+            <a class="card-cta" href="https://www.zulutrade.com" target="_blank" rel="noopener">Open free account →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="platform-card">
+          <div class="card-top">
+            <div>
+              <div class="card-name">NAGA</div>
+              <div class="card-stars">★★★☆☆</div>
+            </div>
+            <div style="font-size:.7rem;color:var(--muted);text-align:right">1M+ users<br>Founded 2015</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tagline">Heavy on social features — feeds, leaderboards, trader profiles. Copy trading is solid, though the asset selection is narrower than eToro.</div>
+            <div class="pros-cons">
+              <div class="pro-item">Social feed</div>
+              <div class="con-item">Smaller asset range</div>
+              <div class="pro-item">No copy trading fee</div>
+              <div class="con-item">Customer support patchy</div>
+              <div class="pro-item">Crypto available</div>
+              <div class="con-item">Less established</div>
+            </div>
+            <div class="commission-note">Commission earned on qualifying referrals.</div>
+            <a class="card-cta" href="https://naga.com" target="_blank" rel="noopener">Open free account →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="platform-card">
+          <div class="card-top">
+            <div>
+              <div class="card-name">Tradeo</div>
+              <div class="card-stars">★★★☆☆</div>
+            </div>
+            <div style="font-size:.7rem;color:var(--muted);text-align:right">MT4 compatible<br>Forex focused</div>
+          </div>
+          <div class="card-body">
+            <div class="card-tagline">Good option for forex-focused traders already on MetaTrader 4. Social layer is functional rather than impressive.</div>
+            <div class="pros-cons">
+              <div class="pro-item">MT4 integration</div>
+              <div class="con-item">Higher min. deposit</div>
+              <div class="pro-item">Strong forex selection</div>
+              <div class="con-item">Limited stock/crypto</div>
+              <div class="pro-item">Regulated</div>
+              <div class="con-item">Smaller community</div>
+            </div>
+            <div class="commission-note">Commission earned on qualifying referrals.</div>
+            <a class="card-cta" href="https://tradeo.com" target="_blank" rel="noopener">Open free account →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── FAQ ── -->
+  <section class="faq">
+    <h2>Common questions</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">Is copy trading profitable?</div>
+      <div class="faq-a">Copy trading can be profitable, but most retail accounts lose money when copy trading CFDs. The best outcomes come from diversifying across multiple traders, setting strict stop-losses, and copying traders with consistent 12+ month track records — not just short-term returns.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How much do I need to start?</div>
+      <div class="faq-a">eToro allows accounts from $50 (varies by country). ZuluTrade is broker-dependent — some partner brokers allow $0 minimums. In practice, $200–$500 gives you enough to copy multiple traders meaningfully.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is copy trading legal?</div>
+      <div class="faq-a">Yes, copy trading is legal in most countries. All platforms reviewed here are regulated by major authorities (FCA, CySEC, ASIC). Regulation status varies by country — always check local rules.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I pay the trader I copy?</div>
+      <div class="faq-a">On eToro, no — the trader earns a bonus from eToro based on copiers, not from you directly. Some platforms do charge performance fees (typically 20% of profits). Always read the fee schedule before copying.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What's the difference between copy trading and mirror trading?</div>
+      <div class="faq-a">Copy trading replicates the live trades of a specific trader you choose. Mirror trading (or social trading signals) typically follows rule-based algorithmic strategies. Copy trading is more personal; mirror trading is more systematic.</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>copytradinghub.com &nbsp;·&nbsp; Independent reviews &nbsp;·&nbsp; <a href="#">Privacy</a></p>
+  <p style="margin-top:.4rem">We use affiliate links. We may earn a commission if you open an account — at no cost to you. 67% of retail CFD accounts lose money. Trading involves risk.</p>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+});
+</script>
+</body>
+</html>
