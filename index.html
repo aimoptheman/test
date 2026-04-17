@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MultiStateButton — Live Demo</title>
+  <link rel="stylesheet" href="components/multi-state-button/MultiStateButton.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f7f7f9;
+      color: #222;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem;
+      gap: 2rem;
+    }
+
+    header { text-align: center; max-width: 540px; }
+    header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    header p  { color: #666; font-size: 0.95rem; line-height: 1.5; }
+    header a  { color: #4f8ef7; text-decoration: none; font-size: 0.85rem; }
+    header a:hover { text-decoration: underline; }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: min(100%, 480px);
+    }
+
+    section {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.07);
+      padding: 1.75rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    section h2     { font-size: 0.9rem; font-weight: 600; color: #444; letter-spacing: .04em; text-transform: uppercase; }
+    section output { font-size: 0.85rem; color: #777; min-height: 1.3em; text-align: center; }
+    section p.hint { font-size: 0.78rem; color: #bbb; }
+
+    footer { font-size: 0.8rem; color: #aaa; text-align: center; }
+    footer a { color: #aaa; }
+
+    #mood-btn   { --msb-font-size: 2.5rem; --msb-size: 4.5rem; }
+    #moon-btn   { --msb-font-size: 2.5rem; --msb-size: 4rem; }
+    #record-btn { --msb-font-size: 1.1rem; --msb-size: auto; --msb-padding: 0.6rem 1.4rem; --msb-border: 2px solid #e0e0e0; }
+    #flag-btn   { --msb-font-size: 2.5rem; --msb-size: 4rem; --msb-border: 2px solid #e0e0e0; }
+    #img-btn    { --msb-size: 5rem; --msb-border: none; --msb-shadow: none; --msb-bg: transparent; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>MultiStateButton</h1>
+    <p>A zero-dependency vanilla-JS component that cycles through states on every click or tap.<br>Works on desktop and mobile.</p>
+    <br>
+    <a href="https://github.com/aimoptheman/test/tree/main/components/multi-state-button">View source &amp; docs on GitHub →</a>
+  </header>
+
+  <main>
+    <section>
+      <h2>Mood selector</h2>
+      <span id="mood-btn"></span>
+      <output id="mood-out"></output>
+      <p class="hint">Tap to cycle</p>
+    </section>
+
+    <section>
+      <h2>Moon phases</h2>
+      <span id="moon-btn"></span>
+      <output id="moon-out"></output>
+      <p class="hint">Tap to advance</p>
+    </section>
+
+    <section>
+      <h2>Recording state</h2>
+      <span id="record-btn"></span>
+      <output id="record-out"></output>
+      <p class="hint">Tap to toggle</p>
+    </section>
+
+    <section>
+      <h2>Country flags</h2>
+      <span id="flag-btn"></span>
+      <output id="flag-out"></output>
+      <p class="hint">Tap to advance</p>
+    </section>
+
+    <section>
+      <h2>On / Off toggle</h2>
+      <span id="img-btn"></span>
+      <output id="img-out">Status: off</output>
+      <p class="hint">Tap to toggle</p>
+    </section>
+  </main>
+
+  <footer>
+    <a href="https://github.com/aimoptheman/test">github.com/aimoptheman/test</a>
+  </footer>
+
+  <script src="components/multi-state-button/MultiStateButton.js"></script>
+  <script>
+    new MultiStateButton('#mood-btn', {
+      states: [
+        { content: '😶', label: 'Neutral'  },
+        { content: '😊', label: 'Happy'    },
+        { content: '😂', label: 'Laughing' },
+        { content: '🤩', label: 'Excited'  },
+        { content: '😎', label: 'Cool'     },
+        { content: '😴', label: 'Sleepy'   },
+      ],
+      onChange: (i, s) => { document.getElementById('mood-out').textContent = s.label; },
+    });
+
+    new MultiStateButton('#moon-btn', {
+      states: [
+        { content: '🌑', label: 'New moon'             },
+        { content: '🌒', label: 'Waxing crescent moon'  },
+        { content: '🌓', label: 'First quarter moon'   },
+        { content: '🌔', label: 'Waxing gibbous moon'  },
+        { content: '🌕', label: 'Full moon'            },
+        { content: '🌖', label: 'Waning gibbous moon'  },
+        { content: '🌗', label: 'Last quarter moon'    },
+        { content: '🌘', label: 'Waning crescent moon' },
+      ],
+      onChange: (i, s) => { document.getElementById('moon-out').textContent = `${i + 1}/8 — ${s.label}`; },
+    });
+
+    new MultiStateButton('#record-btn', {
+      states: [
+        { content: '⏺ Start recording', label: 'Start recording' },
+        { content: '⏹ Stop recording',  label: 'Stop recording'  },
+      ],
+      onChange: (i, s) => { document.getElementById('record-out').textContent = s.label; },
+    });
+
+    new MultiStateButton('#flag-btn', {
+      states: [
+        { content: '🇺🇸', label: 'United States'  },
+        { content: '🇬🇧', label: 'United Kingdom' },
+        { content: '🇩🇪', label: 'Germany'        },
+        { content: '🇯🇵', label: 'Japan'          },
+        { content: '🇧🇷', label: 'Brazil'         },
+        { content: '🇦🇺', label: 'Australia'      },
+      ],
+      onChange: (i, s) => { document.getElementById('flag-out').textContent = s.label; },
+    });
+
+    new MultiStateButton('#img-btn', {
+      states: [
+        { content: 'https://api.iconify.design/mdi/toggle-switch-off-outline.svg?color=%23aaa&width=80', label: 'Off' },
+        { content: 'https://api.iconify.design/mdi/toggle-switch.svg?color=%234caf50&width=80',          label: 'On'  },
+      ],
+      onChange: (i, s) => { document.getElementById('img-out').textContent = `Status: ${s.label.toLowerCase()}`; },
+    });
+  </script>
+
+</body>
+</html>
