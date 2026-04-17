@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT vs Human — Can You Tell Them Apart?</title>
+  <meta name="description" content="An interactive quiz: can you tell which response was written by AI and which by a human? Test your instincts.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ai:    #7c3aed;
+      --human: #0891b2;
+      --right: #16a34a;
+      --wrong: #dc2626;
+      --bg:    #0f0f14;
+      --card:  #18181f;
+      --border:#2a2a35;
+      --text:  #e2e8f0;
+      --muted: #6b7280;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── header ── */
+    header {
+      text-align: center;
+      padding: 2.5rem 1.5rem 1.5rem;
+      background: linear-gradient(180deg, #1a0a2e 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      margin-bottom: .5rem;
+    }
+    .logo .ai-part  { color: var(--ai); }
+    .logo .vs       { color: var(--muted); font-size: 1.2rem; }
+    .logo .hum-part { color: var(--human); }
+    header p { color: var(--muted); font-size: 1rem; margin-bottom: 1rem; }
+
+    /* scoreboard */
+    .scoreboard {
+      display: inline-flex;
+      gap: 2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .75rem 2rem;
+    }
+    .score-item { text-align: center; }
+    .score-num  { font-size: 1.6rem; font-weight: 800; }
+    .score-lbl  { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    #score-right .score-num { color: var(--right); }
+    #score-wrong .score-num { color: var(--wrong); }
+    #score-round .score-num { color: var(--text); }
+
+    /* ── quiz card ── */
+    main { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .question-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .question-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .6rem; }
+    .question-text  { font-size: 1.2rem; font-weight: 700; line-height: 1.4; }
+
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+    @media (max-width: 540px) { .choices { grid-template-columns: 1fr; } }
+
+    .choice {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s;
+      position: relative;
+    }
+    .choice:hover:not(.revealed) { border-color: #4b5563; background: #1f1f2a; transform: translateY(-2px); }
+    .choice-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .6rem;
+    }
+    .choice-text { font-size: .95rem; line-height: 1.6; color: var(--text); }
+
+    /* revealed states */
+    .choice.correct  { border-color: var(--right) !important; background: #052e16 !important; }
+    .choice.wrong    { border-color: var(--wrong) !important; background: #2d0a0a !important; }
+    .choice.neutral  { opacity: .55; }
+
+    .tag {
+      position: absolute;
+      top: .75rem;
+      right: .75rem;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .2rem .5rem;
+      border-radius: 999px;
+    }
+    .tag.ai    { background: #4c1d95; color: #e9d5ff; }
+    .tag.human { background: #0c4a6e; color: #bae6fd; }
+
+    /* hint buttons */
+    .hint-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .hint-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: .8rem;
+      padding: .4rem .9rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .hint-btn:hover { border-color: #6b7280; color: var(--text); }
+
+    /* result message */
+    .result-msg {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: none;
+      margin-bottom: 1.5rem;
+    }
+    .result-msg.show { display: block; }
+    .result-msg.correct { background: #052e16; color: #4ade80; }
+    .result-msg.wrong   { background: #2d0a0a; color: #f87171; }
+
+    /* explanation */
+    .explanation {
+      background: #1a1a24;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--ai);
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.25rem;
+      font-size: .9rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      display: none;
+      margin-bottom: 1.5rem;
+    }
+    .explanation.show { display: block; }
+
+    /* next button */
+    .next-btn {
+      display: none;
+      width: 100%;
+      padding: .85rem;
+      background: var(--ai);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+      margin-bottom: 1rem;
+    }
+    .next-btn:hover { background: #6d28d9; }
+    .next-btn.show { display: block; }
+
+    /* ── end screen ── */
+    #end-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    #end-screen h2 { font-size: 2rem; font-weight: 900; margin-bottom: .5rem; }
+    #end-screen .final-score { font-size: 4rem; font-weight: 900; color: var(--ai); margin: 1rem 0; }
+    #end-screen p  { color: var(--muted); margin-bottom: 2rem; }
+    #play-again {
+      background: var(--ai);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: .85rem 2.5rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    #play-again:hover { background: #6d28d9; }
+
+    /* progress bar */
+    .progress-wrap { background: var(--border); border-radius: 999px; height: 4px; margin-bottom: 1.5rem; }
+    .progress-fill { background: var(--ai); height: 100%; border-radius: 999px; transition: width .4s; }
+
+    /* affiliate strip */
+    .affiliate {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .affiliate p { font-size: .85rem; color: var(--muted); margin-bottom: 1rem; }
+    .affiliate-links { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+    .aff-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .82rem;
+      padding: .5rem 1rem;
+      text-decoration: none;
+      transition: border-color .15s;
+    }
+    .aff-btn:hover { border-color: var(--ai); }
+
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .75rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="ai-part">GPT</span>
+    <span class="vs">vs</span>
+    <span class="hum-part">Human</span>
+  </div>
+  <p>Can you tell the difference? Read both responses and pick which one was written by AI.</p>
+  <div class="scoreboard">
+    <div class="score-item" id="score-right"><div class="score-num" id="right-num">0</div><div class="score-lbl">Correct</div></div>
+    <div class="score-item" id="score-round"><div class="score-num" id="round-num">1/12</div><div class="score-lbl">Round</div></div>
+    <div class="score-item" id="score-wrong"><div class="score-num" id="wrong-num">0</div><div class="score-lbl">Wrong</div></div>
+  </div>
+</header>
+
+<main>
+  <div id="quiz-screen">
+    <div class="progress-wrap"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+    <div class="question-box">
+      <div class="question-label">The prompt was:</div>
+      <div class="question-text" id="question-text"></div>
+    </div>
+
+    <div class="choices">
+      <div class="choice" id="choice-a" onclick="guess('a')">
+        <div class="choice-label">Response A</div>
+        <div class="choice-text" id="text-a"></div>
+      </div>
+      <div class="choice" id="choice-b" onclick="guess('b')">
+        <div class="choice-label">Response B</div>
+        <div class="choice-text" id="text-b"></div>
+      </div>
+    </div>
+
+    <div class="result-msg" id="result-msg"></div>
+    <div class="explanation" id="explanation"></div>
+    <button class="next-btn" id="next-btn" onclick="nextRound()">Next Round →</button>
+
+    <div class="affiliate">
+      <p>Want to sharpen your AI instincts? Try these tools:</p>
+      <div class="affiliate-links">
+        <a class="aff-btn" href="https://chat.openai.com" target="_blank">💬 ChatGPT</a>
+        <a class="aff-btn" href="https://claude.ai" target="_blank">🤖 Claude</a>
+        <a class="aff-btn" href="https://www.jasper.ai" target="_blank">✍️ Jasper AI</a>
+        <a class="aff-btn" href="https://www.copy.ai" target="_blank">📝 Copy.ai</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="end-screen">
+    <h2>Quiz Complete!</h2>
+    <div class="final-score" id="final-score"></div>
+    <p id="end-message"></p>
+    <button id="play-again" onclick="startGame()">Play Again</button>
+
+    <div class="affiliate" style="margin-top:2rem">
+      <p>Explore the AI tools you just tested:</p>
+      <div class="affiliate-links">
+        <a class="aff-btn" href="https://chat.openai.com" target="_blank">💬 ChatGPT</a>
+        <a class="aff-btn" href="https://claude.ai" target="_blank">🤖 Claude</a>
+        <a class="aff-btn" href="https://www.jasper.ai" target="_blank">✍️ Jasper AI</a>
+        <a class="aff-btn" href="https://www.copy.ai" target="_blank">📝 Copy.ai</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>gptvshuman.com — a poc built for fun and affiliate coffee money</footer>
+
+<script>
+const ROUNDS = [
+  {
+    q: "What should I cook for dinner tonight?",
+    gpt: "Here are several nutritious and balanced dinner options to consider:\n\n1. Pasta with marinara sauce — quick, satisfying, and customisable.\n2. Stir-fried vegetables with rice — a healthy, low-cost option.\n3. Grilled chicken with a side salad — high protein, easy to prepare.\n\nConsider what ingredients you currently have on hand to minimise waste.",
+    human: "Honestly? Just do pasta. Throw in whatever's in the fridge — garlic, olive oil, maybe some parmesan if you're feeling fancy. If you have those three things you're already winning.",
+    explain: "GPT tends to use numbered lists and phrases like 'consider' and 'nutritious and balanced.' The human answer is shorter, conversational, and uses 'honestly' — a very human filler word."
+  },
+  {
+    q: "Why is the sky blue?",
+    gpt: "The sky appears blue due to a phenomenon called Rayleigh scattering. When sunlight enters Earth's atmosphere, it collides with gas molecules. Shorter wavelengths of light (blue) scatter more than longer wavelengths (red), causing our eyes to perceive the sky as blue.",
+    human: "Something about light bouncing around in the atmosphere, I think? The shorter wavelengths scatter more or something like that. It was definitely on a physics test once. Blue scatters easier, basically.",
+    explain: "GPT gives a precise, confident, structured explanation. The human hedges ('I think?', 'something like', 'basically') and admits imperfect memory — a very natural human response."
+  },
+  {
+    q: "Write a short poem about Mondays.",
+    gpt: "Monday Morning\n\nThe week unfolds with morning light,\nA canvas fresh, a page of white.\nNew goals await, new tasks to do,\nMonday brings a chance to start anew.",
+    human: "Monday again, you grey bastard.\nCoffee doesn't even help.\nWhy do you keep coming back?\nNobody invited you.",
+    explain: "GPT writes in a positive, structured, rhyming format. The human poem uses mild irreverence, breaks metre deliberately, and expresses a relatable frustration rather than optimism."
+  },
+  {
+    q: "Give me advice about a difficult coworker.",
+    gpt: "Navigating a difficult coworker relationship requires strategic communication. Consider these approaches:\n\n• Schedule a private, calm conversation to address concerns directly.\n• Use 'I' statements to avoid sounding accusatory.\n• Document problematic interactions in case escalation is necessary.\n• If the issue persists, involve HR or a manager as appropriate.",
+    human: "Ugh, I've been there. Honestly just document everything and keep interactions to email so you have a paper trail. Some people just won't change no matter what you say to them. HR is your friend.",
+    explain: "GPT bullet-points the advice and uses formal language ('navigate', 'escalation'). The human commiserates first ('Ugh, I've been there'), is direct, and uses casual phrasing — a natural human pattern."
+  },
+  {
+    q: "Is pineapple on pizza acceptable?",
+    gpt: "The question of whether pineapple belongs on pizza is largely a matter of personal preference. Some enjoy the contrast of sweet and savoury flavours, while others find it unpleasant. Both perspectives are valid, and there is no objectively correct answer.",
+    human: "YES and I will die on this hill. Sweet + savory is literally perfect — have you never had a teriyaki burger? The haters are just wrong, it's not up for debate.",
+    explain: "GPT stays diplomatically neutral and validates 'both perspectives.' The human takes a strong stance, uses emphasis and personal comparisons — a classic human trait in opinion-based conversations."
+  },
+  {
+    q: "How do I get motivated to exercise?",
+    gpt: "Maintaining exercise motivation involves several evidence-based strategies:\n\n1. Set specific, measurable, and achievable goals.\n2. Schedule workouts as non-negotiable calendar events.\n3. Find a form of exercise you genuinely enjoy.\n4. Use habit stacking — pair exercise with an existing routine.",
+    human: "Honestly the only thing that ever worked for me is paying for a class so I feel guilty if I skip it. Or getting a gym buddy. Willpower alone is kind of a myth for this stuff.",
+    explain: "GPT lists 'evidence-based strategies' in formal language. The human admits the limits of willpower ('kind of a myth') and shares personal experience — a very human way to give advice."
+  },
+  {
+    q: "What's the meaning of life?",
+    gpt: "The meaning of life is one of philosophy's most enduring questions. Various traditions offer different perspectives: Aristotle proposed eudaimonia (flourishing); existentialists like Sartre argued meaning is self-created; religious frameworks often suggest divine purpose. Ultimately, meaning may be both personal and culturally shaped.",
+    human: "I dunno. I think you make it up as you go, honestly. Like — doing stuff you actually care about, being decent to people. That's probably it? Nobody really knows.",
+    explain: "GPT cites philosophers by name and structures the answer academically. The human uses uncertainty ('I dunno', 'probably'), rhetorical questions, and personal reflection — a distinctly human answer style."
+  },
+  {
+    q: "Describe heartbreak in a few sentences.",
+    gpt: "Heartbreak is a profound emotional experience characterised by feelings of loss, grief, and sometimes physical pain. It often disrupts sleep, appetite, and concentration. Research suggests the brain processes emotional pain in regions similar to physical pain, making heartbreak genuinely painful on a neurological level.",
+    human: "It's like someone left and took part of your chest with them. Even dumb songs on the radio suddenly feel personal. It fades, but slowly — way more slowly than you want it to.",
+    explain: "GPT defines heartbreak clinically and cites neuroscience. The human uses a visceral metaphor ('took part of your chest'), mentions specific relatable details (radio songs), and conveys a lived sense of time."
+  },
+  {
+    q: "What's a good way to apologise to a friend?",
+    gpt: "An effective apology typically includes: (1) a clear acknowledgement of what you did wrong, (2) an expression of genuine remorse, (3) an explanation without making excuses, and (4) a commitment to change. Avoid deflecting blame or qualifying your apology with 'but.'",
+    human: "Just be straight with them — say what you did and why it was wrong. Don't do the 'I'm sorry you felt that way' thing, that's not an apology. Actually mean it.",
+    explain: "GPT gives a structured, numbered framework. The human calls out a specific bad apology pattern ('I'm sorry you felt that way') — a practical, emotionally-aware observation only someone who's actually navigated friendships would offer."
+  },
+  {
+    q: "Why do we procrastinate?",
+    gpt: "Procrastination is primarily driven by emotion regulation, not laziness. People avoid tasks associated with negative emotions — anxiety, boredom, self-doubt — by seeking short-term relief through distraction. Research by Dr. Pychyl and others shows procrastination is a coping mechanism, not a time-management failure.",
+    human: "Because the task feels bad and Netflix feels good. It's not really about being lazy — it's that your brain would rather do literally anything else when something seems hard or boring or stressful.",
+    explain: "GPT cites a named researcher and uses academic framing ('emotion regulation'). The human reframes it in everyday terms ('Netflix feels good') — accurate and relatable but without citations."
+  },
+  {
+    q: "Tell me something surprising about octopuses.",
+    gpt: "Octopuses are remarkably intelligent invertebrates. Each of their eight arms contains its own cluster of neurons, allowing arms to act semi-autonomously. They can also change both colour and texture in under a second, despite being colourblind — they may perceive colour through photoreceptors in their skin.",
+    human: "They're colourblind but can somehow change colour perfectly to match their surroundings — scientists think they might 'see' through their skin?? That's insane. Also each arm basically has its own brain.",
+    explain: "GPT is accurate and well-structured. The human uses '??' for genuine amazement and the word 'insane' — informal expressions of wonder that are natural in casual speech but rare in GPT output."
+  },
+  {
+    q: "Give me a pep talk for a job interview.",
+    gpt: "You are well-prepared and capable. Remember that interviews are a two-way evaluation — you are also assessing whether this role is right for you. Breathe, speak at a measured pace, and remember that a brief pause before answering reflects thoughtfulness, not weakness. You've got this.",
+    human: "Okay listen — you already got the interview, which means they think you could do the job. Just be a human in there. It's mostly vibes and not stumbling over basic questions. You'll be fine, for real.",
+    explain: "GPT closes with 'You've got this' — a phrase it uses very frequently. The human says 'It's mostly vibes' — an informal, authentic framing that only someone who's been through interviews would casually say."
+  }
+];
+
+let order = [], roundIdx = 0, correct = 0, wrong = 0, answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  order = shuffle([...Array(ROUNDS.length).keys()]);
+  roundIdx = 0; correct = 0; wrong = 0;
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  loadRound();
+}
+
+function loadRound() {
+  answered = false;
+  const r = ROUNDS[order[roundIdx]];
+
+  // Randomly assign gpt/human to A/B
+  const gptIsA = Math.random() < .5;
+
+  const ca = document.getElementById('choice-a');
+  const cb = document.getElementById('choice-b');
+  ca.dataset.isGpt = gptIsA ? 'true' : 'false';
+  cb.dataset.isGpt = gptIsA ? 'false' : 'true';
+
+  document.getElementById('question-text').textContent = r.q;
+  document.getElementById('text-a').textContent = gptIsA ? r.gpt : r.human;
+  document.getElementById('text-b').textContent = gptIsA ? r.human : r.gpt;
+
+  // Reset styles
+  [ca, cb].forEach(el => {
+    el.className = 'choice';
+    el.style.cursor = 'pointer';
+    const tag = el.querySelector('.tag');
+    if (tag) tag.remove();
+  });
+
+  document.getElementById('result-msg').className = 'result-msg';
+  document.getElementById('explanation').className = 'explanation';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  // Progress
+  const pct = (roundIdx / ROUNDS.length) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+
+  // Score
+  document.getElementById('right-num').textContent = correct;
+  document.getElementById('wrong-num').textContent = wrong;
+  document.getElementById('round-num').textContent = (roundIdx + 1) + '/' + ROUNDS.length;
+}
+
+function guess(choice) {
+  if (answered) return;
+  answered = true;
+
+  const ca = document.getElementById('choice-a');
+  const cb = document.getElementById('choice-b');
+  const clicked = choice === 'a' ? ca : cb;
+  const other   = choice === 'a' ? cb : ca;
+  const r = ROUNDS[order[roundIdx]];
+  const isCorrect = clicked.dataset.isGpt === 'true';
+
+  // Tag both choices
+  function tagEl(el, isGpt) {
+    const tag = document.createElement('div');
+    tag.className = 'tag ' + (isGpt ? 'ai' : 'human');
+    tag.textContent = isGpt ? '🤖 GPT' : '🧑 Human';
+    el.appendChild(tag);
+    el.classList.add('revealed');
+  }
+
+  tagEl(ca, ca.dataset.isGpt === 'true');
+  tagEl(cb, cb.dataset.isGpt === 'true');
+
+  if (isCorrect) {
+    correct++;
+    clicked.classList.add('correct');
+    other.classList.add('neutral');
+    const msg = document.getElementById('result-msg');
+    msg.textContent = ['✅ Correct! You spotted the AI.', '✅ Nailed it!', '✅ Right! That one had GPT written all over it.'][Math.floor(Math.random()*3)];
+    msg.className = 'result-msg correct show';
+  } else {
+    wrong++;
+    clicked.classList.add('wrong');
+    other.classList.add('correct');
+    const msg = document.getElementById('result-msg');
+    msg.textContent = ['❌ Nope — that was the human!', '❌ Fooled you this time!', '❌ Wrong — the AI was on the other side.'][Math.floor(Math.random()*3)];
+    msg.className = 'result-msg wrong show';
+  }
+
+  // Explanation
+  const exp = document.getElementById('explanation');
+  exp.textContent = '💡 ' + r.explain;
+  exp.className = 'explanation show';
+
+  // Cursor
+  [ca, cb].forEach(el => el.style.cursor = 'default');
+
+  // Update score display
+  document.getElementById('right-num').textContent = correct;
+  document.getElementById('wrong-num').textContent = wrong;
+
+  // Next button
+  document.getElementById('next-btn').className = 'next-btn show';
+  document.getElementById('next-btn').textContent =
+    roundIdx + 1 < ROUNDS.length ? 'Next Round →' : 'See Results';
+}
+
+function nextRound() {
+  roundIdx++;
+  if (roundIdx >= ROUNDS.length) {
+    showEndScreen();
+  } else {
+    loadRound();
+  }
+}
+
+function showEndScreen() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  const end = document.getElementById('end-screen');
+  end.style.display = 'block';
+
+  const pct = Math.round((correct / ROUNDS.length) * 100);
+  document.getElementById('final-score').textContent = correct + '/' + ROUNDS.length;
+  document.getElementById('progress').style.width = '100%';
+
+  const msgs = [
+    [100, "🏆 Perfect score! You're basically a Turing test judge."],
+    [80,  "🎯 Impressive! You've got a sharp eye for AI."],
+    [60,  "👍 Not bad — you're getting the hang of it."],
+    [40,  "🤔 The AI fooled you more than once. Keep practising!"],
+    [0,   "😅 The machines win this round. Try again?"]
+  ];
+  const msg = msgs.find(([thresh]) => pct >= thresh);
+  document.getElementById('end-message').textContent = msg[1];
+}
+
+startGame();
+</script>
+</body>
+</html>
