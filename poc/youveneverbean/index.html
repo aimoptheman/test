@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You've Never Bean This Good — Coffee Reviews & Finds</title>
+  <meta name="description" content="The coffee you've never bean brave enough to try. Honest reviews, ridiculous rankings, and the best beans on the internet.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brown: #6b3a2a;
+      --cream: #fdf6ec;
+      --espresso: #1a0a00;
+      --roast: #c0621e;
+      --gold: #d4a017;
+      --muted: #7c6555;
+      --card: #fff8f0;
+      --border: #e8d5c0;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--espresso);
+      font-family: 'Georgia', serif;
+      line-height: 1.7;
+    }
+
+    /* ── hero ── */
+    .hero {
+      background: var(--espresso);
+      color: var(--cream);
+      text-align: center;
+      padding: 4rem 1.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center top, #3d1a06 0%, var(--espresso) 70%);
+    }
+    .hero * { position: relative; }
+
+    .steam { font-size: 2rem; display: block; margin-bottom: .5rem; animation: rise 2s ease-in-out infinite alternate; }
+    @keyframes rise { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-8px); opacity: .7; } }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+      line-height: 1.15;
+    }
+    h1 em { color: var(--gold); font-style: normal; }
+    .hero-sub { font-size: 1.1rem; color: #c4a882; margin-bottom: 2rem; font-family: system-ui, sans-serif; }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--roast);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: .35rem 1rem;
+      border-radius: 999px;
+      font-family: system-ui, sans-serif;
+    }
+
+    /* ── nav strip ── */
+    nav {
+      background: var(--brown);
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: .75rem 1rem;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: #e8c9a0;
+      text-decoration: none;
+      font-size: .85rem;
+      font-family: system-ui, sans-serif;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .15s;
+    }
+    nav a:hover { color: #fff; }
+
+    /* ── main layout ── */
+    main { max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem; }
+
+    h2 {
+      font-size: 1.8rem;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: var(--brown);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: .6rem;
+    }
+    h2 span { color: var(--roast); }
+
+    /* ── product grid ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3.5rem;
+    }
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(107,58,42,.12); }
+
+    .product-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background: #e8d5c0;
+    }
+    .product-img-placeholder {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      background: linear-gradient(135deg, #3d1a06, #6b3a2a);
+    }
+    .product-body { padding: 1.1rem; }
+    .product-category {
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--roast);
+      font-family: system-ui, sans-serif;
+      margin-bottom: .4rem;
+    }
+    .product-name { font-size: 1.1rem; font-weight: 700; margin-bottom: .35rem; font-family: system-ui, sans-serif; }
+    .product-desc { font-size: .85rem; color: var(--muted); margin-bottom: .9rem; line-height: 1.5; }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+    .stars { color: var(--gold); font-size: .9rem; }
+    .buy-btn {
+      display: inline-block;
+      background: var(--roast);
+      color: #fff;
+      font-size: .8rem;
+      font-weight: 700;
+      font-family: system-ui, sans-serif;
+      padding: .45rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .buy-btn:hover { background: var(--brown); }
+
+    /* ── funny copy section ── */
+    .manifesto {
+      background: var(--espresso);
+      color: var(--cream);
+      border-radius: 14px;
+      padding: 2.5rem;
+      margin-bottom: 3.5rem;
+      font-size: 1.05rem;
+    }
+    .manifesto h3 { font-size: 1.5rem; font-style: italic; color: var(--gold); margin-bottom: 1rem; }
+    .manifesto p  { margin-bottom: 1rem; color: #c4a882; }
+    .manifesto p:last-child { margin-bottom: 0; }
+    .manifesto strong { color: var(--cream); }
+
+    /* ── email capture ── */
+    .email-strip {
+      background: var(--brown);
+      color: var(--cream);
+      border-radius: 14px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .email-strip h3 { font-size: 1.4rem; font-style: italic; margin-bottom: .5rem; color: var(--gold); }
+    .email-strip p  { font-size: .9rem; color: #c4a882; margin-bottom: 1.25rem; font-family: system-ui, sans-serif; }
+    .email-form { display: flex; gap: .5rem; max-width: 420px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+    .email-form input {
+      flex: 1;
+      min-width: 200px;
+      padding: .6rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: system-ui, sans-serif;
+    }
+    .email-form button {
+      background: var(--roast);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .6rem 1.25rem;
+      font-size: .9rem;
+      font-weight: 700;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .email-form button:hover { background: #a04e14; }
+
+    /* ── ranking list ── */
+    .ranking { margin-bottom: 3.5rem; }
+    .rank-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rank-num {
+      font-size: 2.5rem;
+      font-style: italic;
+      color: var(--border);
+      font-weight: 900;
+      min-width: 2.5rem;
+      line-height: 1;
+    }
+    .rank-body { flex: 1; }
+    .rank-title { font-size: 1.05rem; font-weight: 700; font-family: system-ui, sans-serif; margin-bottom: .2rem; }
+    .rank-reason { font-size: .88rem; color: var(--muted); }
+    .rank-link {
+      font-size: .8rem;
+      color: var(--roast);
+      text-decoration: none;
+      font-family: system-ui, sans-serif;
+      font-weight: 600;
+    }
+    .rank-link:hover { text-decoration: underline; }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .78rem;
+      border-top: 1px solid var(--border);
+      font-family: system-ui, sans-serif;
+    }
+    footer a { color: var(--roast); }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="steam">☕</span>
+  <h1>You've Never <em>Bean</em> This Good</h1>
+  <p class="hero-sub">Honest coffee reviews. Ridiculous rankings. Beans worth waking up for.</p>
+  <div class="hero-badge">☕ est. whenever the espresso kicked in</div>
+</div>
+
+<nav>
+  <a href="#picks">Top Picks</a>
+  <a href="#rankings">Rankings</a>
+  <a href="#manifesto">Our Mission</a>
+  <a href="#newsletter">Newsletter</a>
+</nav>
+
+<main>
+
+  <!-- ── Top Picks ── -->
+  <section id="picks">
+    <h2>Beans you've never <span>bean</span> brave enough to try</h2>
+    <div class="product-grid">
+
+      <div class="product-card">
+        <div class="product-img-placeholder">🫘</div>
+        <div class="product-body">
+          <div class="product-category">Single Origin</div>
+          <div class="product-name">Ethiopian Yirgacheffe</div>
+          <div class="product-desc">Blueberry. Jasmine. Who said coffee had to taste like coffee? This one tastes like a decision you'll feel good about.</div>
+          <div class="product-footer">
+            <span class="stars">★★★★★</span>
+            <a class="buy-btn" href="https://www.amazon.com/s?k=ethiopian+yirgacheffe+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Shop →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-placeholder">🌋</div>
+        <div class="product-body">
+          <div class="product-category">Dark Roast</div>
+          <div class="product-name">Sumatra Mandheling</div>
+          <div class="product-desc">Dark, earthy, full-bodied. The coffee that makes you feel like you could survive anything. Great with your existential 6am spiral.</div>
+          <div class="product-footer">
+            <span class="stars">★★★★☆</span>
+            <a class="buy-btn" href="https://www.amazon.com/s?k=sumatra+mandheling+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Shop →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-placeholder">🏔️</div>
+        <div class="product-body">
+          <div class="product-category">Medium Roast</div>
+          <div class="product-name">Colombian Huila</div>
+          <div class="product-desc">Caramel and citrus. The coffee that makes you say "I don't even need sugar." Then you add sugar anyway. No judgement.</div>
+          <div class="product-footer">
+            <span class="stars">★★★★★</span>
+            <a class="buy-btn" href="https://www.amazon.com/s?k=colombian+huila+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Shop →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-placeholder">⚗️</div>
+        <div class="product-body">
+          <div class="product-category">Espresso Gear</div>
+          <div class="product-name">Moka Pot (Bialetti)</div>
+          <div class="product-desc">The best $30 you'll ever spend. Stop paying $6 a cup. Make it yourself. You've bean able to this whole time.</div>
+          <div class="product-footer">
+            <span class="stars">★★★★★</span>
+            <a class="buy-btn" href="https://www.amazon.com/s?k=bialetti+moka+pot&tag=youveneverbean-20" target="_blank" rel="noopener">Shop →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-placeholder">🌿</div>
+        <div class="product-body">
+          <div class="product-category">Subscription</div>
+          <div class="product-name">Trade Coffee</div>
+          <div class="product-desc">A subscription that actually learns what you like. Cancel anytime. Roasters you've never heard of. Beans you'll never forget.</div>
+          <div class="product-footer">
+            <span class="stars">★★★★★</span>
+            <a class="buy-btn" href="https://www.tradecoffeeco.com" target="_blank" rel="noopener">Try it →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-placeholder">🔬</div>
+        <div class="product-body">
+          <div class="product-category">Burr Grinder</div>
+          <div class="product-name">Baratza Encore</div>
+          <div class="product-desc">Pre-grinding kills flavour. This grinder doesn't. The single best upgrade for your morning routine. Your future self will thank you.</div>
+          <div class="product-footer">
+            <span class="stars">★★★★★</span>
+            <a class="buy-btn" href="https://www.amazon.com/s?k=baratza+encore+grinder&tag=youveneverbean-20" target="_blank" rel="noopener">Shop →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Rankings ── -->
+  <section id="rankings" class="ranking">
+    <h2>The definitive <span>bean</span> tier list</h2>
+    <div class="rank-item">
+      <div class="rank-num">1</div>
+      <div class="rank-body">
+        <div class="rank-title">Ethiopian natural process</div>
+        <div class="rank-reason">Tastes like a fruit salad had a beautiful accident with a coffee plant. Top tier. Non-negotiable.</div>
+        <a class="rank-link" href="https://www.amazon.com/s?k=ethiopian+natural+process+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Find it on Amazon →</a>
+      </div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">2</div>
+      <div class="rank-body">
+        <div class="rank-title">Kenyan AA</div>
+        <div class="rank-reason">Bright, wine-like, slightly aggressive. Like that friend who's always right and knows it. You need it in your life.</div>
+        <a class="rank-link" href="https://www.amazon.com/s?k=kenyan+AA+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Find it on Amazon →</a>
+      </div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">3</div>
+      <div class="rank-body">
+        <div class="rank-title">Guatemala Antigua</div>
+        <div class="rank-reason">Chocolate and spice. The coffee equivalent of a reliable car that somehow also has personality.</div>
+        <a class="rank-link" href="https://www.amazon.com/s?k=guatemala+antigua+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Find it on Amazon →</a>
+      </div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">4</div>
+      <div class="rank-body">
+        <div class="rank-title">Canned pre-ground from the grocery store</div>
+        <div class="rank-reason">We've all been there. No judgement. But there's a better life waiting for you and it costs $16.</div>
+        <a class="rank-link" href="https://www.amazon.com/s?k=whole+bean+specialty+coffee&tag=youveneverbean-20" target="_blank" rel="noopener">Upgrade here →</a>
+      </div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">5</div>
+      <div class="rank-body">
+        <div class="rank-title">Whatever your office provides</div>
+        <div class="rank-reason">It's not coffee. It's a social agreement. Drink it. Survive. But bring a real cup tomorrow.</div>
+        <a class="rank-link" href="https://www.amazon.com/s?k=travel+coffee+mug&tag=youveneverbean-20" target="_blank" rel="noopener">Get a travel mug →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Manifesto ── -->
+  <section id="manifesto">
+    <div class="manifesto">
+      <h3>☕ A note from us</h3>
+      <p>We started this site because we got tired of coffee content that takes itself way too seriously. <strong>Life is short. Coffee should be good.</strong> That's it. That's the whole mission.</p>
+      <p>We review beans we've actually tried. We link to places you can actually buy them. Sometimes on Amazon, sometimes direct from roasters. We use affiliate links — if you buy something, we get a small cut at no extra cost to you. <strong>That's how we keep the lights on and the espresso flowing.</strong></p>
+      <p>We are not sponsored by Big Coffee. We are not trying to sell you on a $4,000 espresso machine. We are just two people who got a little too deep into the rabbit hole and decided to make it your problem too.</p>
+      <p><strong>You've never bean here before. Welcome.</strong></p>
+    </div>
+  </section>
+
+  <!-- ── Newsletter ── -->
+  <section id="newsletter">
+    <div class="email-strip">
+      <h3>Get the weekly bean briefing</h3>
+      <p>New finds, bad puns, and one actually useful coffee tip. Every Friday. Unsubscribe if you're a monster.</p>
+      <form class="email-form" onsubmit="handleSub(event)">
+        <input type="email" placeholder="your@email.com" required id="email-input">
+        <button type="submit">Subscribe ☕</button>
+      </form>
+      <div id="sub-msg" style="display:none; margin-top:.75rem; color:#d4a017; font-size:.85rem; font-family: system-ui, sans-serif;"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    &copy; youveneverbean.com &nbsp;·&nbsp;
+    <a href="https://www.amazon.com?tag=youveneverbean-20" target="_blank">Amazon</a> &nbsp;·&nbsp;
+    <a href="https://www.tradecoffeeco.com" target="_blank">Trade Coffee</a>
+  </p>
+  <p style="margin-top:.5rem; color: #b0967c;">
+    We use affiliate links. If you buy something we may earn a commission — at no cost to you. Thanks for supporting the habit.
+  </p>
+</footer>
+
+<script>
+function handleSub(e) {
+  e.preventDefault();
+  const email = document.getElementById('email-input').value;
+  const msg = document.getElementById('sub-msg');
+  msg.style.display = 'block';
+  msg.textContent = '☕ You\'re in. First issue drops Friday. Check your inbox (and probably spam).';
+  document.getElementById('email-input').value = '';
+}
+</script>
+</body>
+</html>
