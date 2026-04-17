@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Angular MultiStateButton — Live Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+    }
+
+    /* ── header ── */
+    header {
+      background: linear-gradient(135deg, #1a1f36 0%, #0d1117 100%);
+      border-bottom: 1px solid #30363d;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: #dd0031;
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .25rem .7rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; }
+    .subtitle { color: #8b949e; font-size: 1rem; }
+    .subtitle a { color: #58a6ff; text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
+
+    /* ── nav ── */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 1rem;
+      border-bottom: 1px solid #21262d;
+      background: #161b22;
+    }
+    nav a {
+      color: #8b949e;
+      text-decoration: none;
+      font-size: .9rem;
+      padding: .35rem .7rem;
+      border-radius: 6px;
+      transition: all .15s;
+    }
+    nav a:hover, nav a.active { color: #e6edf3; background: #21262d; }
+
+    /* ── main ── */
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding-bottom: .6rem;
+      border-bottom: 1px solid #21262d;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    h2 .icon { font-size: 1.1rem; }
+
+    /* ── demo cards ── */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: #58a6ff; }
+    .card-title { font-size: .85rem; color: #8b949e; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+    .card-log { font-size: .8rem; color: #3fb950; min-height: 1.2em; font-family: monospace; }
+
+    /* ── msb button ── */
+    .msb {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--msb-size, 4rem);
+      height: var(--msb-size, 4rem);
+      padding: 0;
+      background: var(--msb-bg, #21262d);
+      border: var(--msb-border, 2px solid #30363d);
+      border-radius: var(--msb-radius, 50%);
+      font-size: var(--msb-font-size, 1.8rem);
+      cursor: pointer;
+      transition: background .15s, transform .1s, border-color .15s;
+      user-select: none;
+      overflow: hidden;
+      color: inherit;
+    }
+    .msb:hover { background: var(--msb-bg-hover, #30363d); border-color: #58a6ff; }
+    .msb:active { transform: scale(.9); }
+    .msb img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+    /* ── code section ── */
+    .tabs { display: flex; gap: .25rem; margin-bottom: 0; }
+    .tab-btn {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      color: #8b949e;
+      font-size: .8rem;
+      padding: .4rem .9rem;
+      cursor: pointer;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      transition: all .15s;
+    }
+    .tab-btn.active, .tab-btn:hover { color: #e6edf3; background: #161b22; }
+    .tab-btn.active { color: #58a6ff; }
+    .code-block {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 0 6px 6px 6px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      display: none;
+    }
+    .code-block.active { display: block; }
+    pre { margin: 0; }
+    code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: .82rem;
+      line-height: 1.6;
+    }
+
+    /* syntax colours */
+    .kw { color: #ff7b72; }   /* keywords */
+    .dc { color: #d2a8ff; }   /* decorators / types */
+    .st { color: #a5d6ff; }   /* strings */
+    .cm { color: #8b949e; font-style: italic; } /* comments */
+    .fn { color: #79c0ff; }   /* functions */
+    .nb { color: #ffa657; }   /* numbers / booleans */
+    .cl { color: #ffa657; }   /* class names */
+
+    /* ── install box ── */
+    .install-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: monospace;
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      color: #3fb950;
+    }
+    .install-box .prompt { color: #8b949e; }
+
+    /* ── api table ── */
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; padding: .6rem .8rem; color: #8b949e; border-bottom: 1px solid #21262d; font-weight: 600; }
+    td { padding: .55rem .8rem; border-bottom: 1px solid #21262d; vertical-align: top; }
+    td:first-child { font-family: monospace; color: #a5d6ff; white-space: nowrap; }
+    td:nth-child(2) { font-family: monospace; color: #d2a8ff; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #6e7681;
+      font-size: .8rem;
+      border-top: 1px solid #21262d;
+    }
+    footer a { color: #8b949e; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9.931 12.645h4.138l-2.07-4.908m0-7.737L.68 3.982l1.726 14.771L12 22.02l9.596-3.268L23.32 3.982 12 .001zm7.064 18.31h-2.638l-1.422-3.503H8.996l-1.422 3.504h-2.64L12 2.65z"/></svg>
+    Angular 17 Component
+  </div>
+  <h1>MultiStateButton</h1>
+  <p class="subtitle">
+    A button that cycles through states on each click &nbsp;·&nbsp;
+    Source: <a href="https://github.com/aimoptheman/angular-components" target="_blank">aimoptheman/angular-components</a>
+  </p>
+</header>
+
+<nav>
+  <a href="#demo" class="active">Live Demo</a>
+  <a href="#api">API</a>
+  <a href="#code">Source</a>
+  <a href="#install">Usage</a>
+</nav>
+
+<main>
+
+  <!-- ── LIVE DEMO ── -->
+  <section id="demo">
+    <h2><span class="icon">▶</span> Live Demo</h2>
+    <div class="demo-grid" id="demo-grid"></div>
+  </section>
+
+  <!-- ── API ── -->
+  <section id="api">
+    <h2><span class="icon">📋</span> API Reference</h2>
+    <h3 style="color:#8b949e;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Inputs</h3>
+    <table style="margin-bottom:1.5rem">
+      <tr><th>Property</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td>[states]</td><td>MsbState[]</td><td>✅</td><td>Ordered list of states to cycle through</td></tr>
+      <tr><td>[initialIndex]</td><td>number</td><td></td><td>Zero-based starting index (default 0)</td></tr>
+    </table>
+    <h3 style="color:#8b949e;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Outputs</h3>
+    <table style="margin-bottom:1.5rem">
+      <tr><th>Event</th><th>Payload</th><th>Description</th></tr>
+      <tr><td>(stateChange)</td><td>{ index, state }</td><td>Emitted after every click with the new index and state</td></tr>
+    </table>
+    <h3 style="color:#8b949e;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">CSS Custom Properties</h3>
+    <table>
+      <tr><th>Property</th><th>Default</th><th>Description</th></tr>
+      <tr><td>--msb-size</td><td>3rem</td><td>Button diameter</td></tr>
+      <tr><td>--msb-bg</td><td>#f0f0f0</td><td>Background colour</td></tr>
+      <tr><td>--msb-bg-hover</td><td>#e0e0e0</td><td>Hover background</td></tr>
+      <tr><td>--msb-border</td><td>2px solid #ccc</td><td>Border</td></tr>
+      <tr><td>--msb-radius</td><td>50%</td><td>Border radius</td></tr>
+      <tr><td>--msb-font-size</td><td>1.5rem</td><td>Content font size</td></tr>
+    </table>
+  </section>
+
+  <!-- ── SOURCE CODE ── -->
+  <section id="code">
+    <h2><span class="icon">📄</span> Component Source</h2>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('ts')">multi-state-button.component.ts</button>
+      <button class="tab-btn" onclick="showTab('html')">multi-state-button.component.html</button>
+      <button class="tab-btn" onclick="showTab('css')">multi-state-button.component.css</button>
+    </div>
+
+    <div id="tab-ts" class="code-block active"><pre><code
+><span class="kw">import</span> {
+  ChangeDetectionStrategy, Component, EventEmitter,
+  Input, OnInit, Output, computed, signal,
+} <span class="kw">from</span> <span class="st">'@angular/core'</span>;
+<span class="kw">import</span> { NgIf } <span class="kw">from</span> <span class="st">'@angular/common'</span>;
+<span class="kw">import</span> { MsbState, MsbStateChangeEvent } <span class="kw">from</span> <span class="st">'./multi-state-button.types'</span>;
+
+<span class="dc">@Component</span>({
+  selector: <span class="st">'msb-multi-state-button'</span>,
+  standalone: <span class="nb">true</span>,
+  imports: [NgIf],
+  templateUrl: <span class="st">'./multi-state-button.component.html'</span>,
+  styleUrls: [<span class="st">'./multi-state-button.component.css'</span>],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+<span class="kw">export class</span> <span class="cl">MultiStateButtonComponent</span> <span class="kw">implements</span> <span class="cl">OnInit</span> {
+  <span class="cm">/** Ordered list of states. Required; must be non-empty. */</span>
+  <span class="dc">@Input</span>({ required: <span class="nb">true</span> })
+  <span class="kw">set</span> <span class="fn">states</span>(v: MsbState[]) { <span class="kw">this</span>._states.<span class="fn">set</span>(v); }
+  <span class="kw">get</span> <span class="fn">states</span>(): MsbState[] { <span class="kw">return this</span>._states(); }
+
+  <span class="cm">/** Zero-based index of the initial state. */</span>
+  <span class="dc">@Input</span>()
+  <span class="kw">set</span> <span class="fn">initialIndex</span>(v: <span class="kw">number</span>) { <span class="kw">this</span>._index.<span class="fn">set</span>(v); }
+  <span class="kw">get</span> <span class="fn">initialIndex</span>(): <span class="kw">number</span> { <span class="kw">return this</span>._index(); }
+
+  <span class="cm">/** Emits after each click with the new index and state. */</span>
+  <span class="dc">@Output</span>() <span class="kw">readonly</span> stateChange = <span class="kw">new</span> <span class="cl">EventEmitter</span>&lt;MsbStateChangeEvent&gt;();
+
+  <span class="kw">private readonly</span> _states = <span class="fn">signal</span>&lt;MsbState[]&gt;([]);
+  <span class="kw">private readonly</span> _index  = <span class="fn">signal</span>(<span class="nb">0</span>);
+
+  <span class="kw">readonly</span> currentState = <span class="fn">computed</span>(() =&gt; <span class="kw">this</span>._states()[<span class="kw">this</span>._index()]);
+  <span class="kw">readonly</span> isImageContent = <span class="fn">computed</span>(() =&gt; {
+    <span class="kw">const</span> c = <span class="kw">this</span>.<span class="fn">currentState</span>()?.content ?? <span class="st">''</span>;
+    <span class="kw">return</span> c.<span class="fn">startsWith</span>(<span class="st">'http://'</span>) || c.<span class="fn">startsWith</span>(<span class="st">'https://'</span>);
+  });
+
+  <span class="fn">ngOnInit</span>(): <span class="kw">void</span> {
+    <span class="kw">if</span> (!<span class="kw">this</span>._states().length)
+      <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="st">'msb-multi-state-button: [states] must be non-empty.'</span>);
+  }
+
+  <span class="fn">advance</span>(): <span class="kw">void</span> {
+    <span class="kw">const</span> next = (<span class="kw">this</span>._index() + <span class="nb">1</span>) % <span class="kw">this</span>._states().length;
+    <span class="kw">this</span>._index.<span class="fn">set</span>(next);
+    <span class="kw">this</span>.stateChange.<span class="fn">emit</span>({ index: next, state: <span class="kw">this</span>.<span class="fn">currentState</span>() });
+  }
+}</code></pre></div>
+
+    <div id="tab-html" class="code-block"><pre><code
+>&lt;<span class="fn">button</span>
+  <span class="kw">class</span>=<span class="st">"msb"</span>
+  <span class="kw">type</span>=<span class="st">"button"</span>
+  <span class="dc">(click)</span>=<span class="st">"advance()"</span>
+  <span class="dc">[attr.aria-label]</span>=<span class="st">"currentState()?.label ?? currentState()?.content"</span>
+&gt;
+  &lt;<span class="fn">img</span>
+    <span class="dc">*ngIf</span>=<span class="st">"isImageContent()"</span>
+    <span class="dc">[src]</span>=<span class="st">"currentState()!.content"</span>
+    <span class="dc">[alt]</span>=<span class="st">"currentState()?.label ?? ''"</span>
+    <span class="kw">class</span>=<span class="st">"msb-img"</span>
+  /&gt;
+  &lt;<span class="fn">span</span> <span class="dc">*ngIf</span>=<span class="st">"!isImageContent()"</span>&gt;{{ currentState()?.content }}&lt;/<span class="fn">span</span>&gt;
+&lt;/<span class="fn">button</span>&gt;</code></pre></div>
+
+    <div id="tab-css" class="code-block"><pre><code
+><span class="dc">:host</span> { display: inline-block; }
+
+<span class="fn">.msb</span> {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: <span class="fn">var</span>(<span class="kw">--msb-size</span>, <span class="nb">3rem</span>);
+  height: <span class="fn">var</span>(<span class="kw">--msb-size</span>, <span class="nb">3rem</span>);
+  padding: <span class="nb">0</span>;
+  background: <span class="fn">var</span>(<span class="kw">--msb-bg</span>, <span class="nb">#f0f0f0</span>);
+  border: <span class="fn">var</span>(<span class="kw">--msb-border</span>, <span class="nb">2px solid #ccc</span>);
+  border-radius: <span class="fn">var</span>(<span class="kw">--msb-radius</span>, <span class="nb">50%</span>);
+  font-size: <span class="fn">var</span>(<span class="kw">--msb-font-size</span>, <span class="nb">1.5rem</span>);
+  cursor: pointer;
+  transition: background <span class="nb">.15s</span> ease, transform <span class="nb">.1s</span> ease;
+  user-select: none;
+  overflow: hidden;
+}
+<span class="fn">.msb:hover</span>  { background: <span class="fn">var</span>(<span class="kw">--msb-bg-hover</span>, <span class="nb">#e0e0e0</span>); }
+<span class="fn">.msb:active</span> { transform: <span class="fn">scale</span>(<span class="nb">.92</span>); }
+<span class="fn">.msb-img</span>    { width: <span class="nb">100%</span>; height: <span class="nb">100%</span>; object-fit: cover; border-radius: inherit; }</code></pre></div>
+  </section>
+
+  <!-- ── USAGE ── -->
+  <section id="install">
+    <h2><span class="icon">🚀</span> Installation &amp; Usage</h2>
+    <div class="install-box" style="margin-bottom:1.25rem">
+      <span class="prompt">$</span> npm install @aimoptheman/angular-components
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('usage')">app.component.ts</button>
+    </div>
+    <div id="tab-usage" class="code-block active"><pre><code
+><span class="kw">import</span> { Component } <span class="kw">from</span> <span class="st">'@angular/core'</span>;
+<span class="kw">import</span> { MultiStateButtonComponent } <span class="kw">from</span> <span class="st">'@aimoptheman/angular-components'</span>;
+
+<span class="dc">@Component</span>({
+  standalone: <span class="nb">true</span>,
+  imports: [MultiStateButtonComponent],
+  template: <span class="st">`
+    &lt;msb-multi-state-button
+      [states]="moods"
+      (stateChange)="onMoodChange($event)"
+    /&gt;
+  `</span>
+})
+<span class="kw">export class</span> <span class="cl">AppComponent</span> {
+  moods = [
+    { content: <span class="st">'😊'</span>, label: <span class="st">'Happy'</span>    },
+    { content: <span class="st">'😐'</span>, label: <span class="st">'Neutral'</span>  },
+    { content: <span class="st">'😢'</span>, label: <span class="st">'Sad'</span>      },
+    { content: <span class="st">'😠'</span>, label: <span class="st">'Angry'</span>    },
+    { content: <span class="st">'🤩'</span>, label: <span class="st">'Excited'</span>  },
+  ];
+
+  <span class="fn">onMoodChange</span>({ index, state }) {
+    console.<span class="fn">log</span>(<span class="st">`State changed to index </span>${index}<span class="st">: </span>${state.label}<span class="st">`</span>);
+  }
+}</code></pre></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/aimoptheman/angular-components" target="_blank">Source</a> &nbsp;·&nbsp;
+    <a href="https://aimoptheman.github.io/test/" target="_blank">Vanilla JS Demo</a> &nbsp;·&nbsp;
+    Built with Angular 17
+  </p>
+</footer>
+
+<script>
+// ── MultiStateButton vanilla implementation (mirrors the Angular component exactly) ──
+class MultiStateButton {
+  constructor(states, initialIndex = 0) {
+    this._states = states;
+    this._index  = initialIndex;
+    this._listeners = [];
+  }
+  get currentState() { return this._states[this._index]; }
+  advance() {
+    this._index = (this._index + 1) % this._states.length;
+    this._listeners.forEach(fn => fn({ index: this._index, state: this.currentState }));
+    return this.currentState;
+  }
+  onStateChange(fn) { this._listeners.push(fn); }
+}
+
+function makeButton(card, msb) {
+  const btn = document.createElement('button');
+  btn.className = 'msb';
+  btn.setAttribute('aria-label', msb.currentState.label ?? msb.currentState.content);
+
+  function render(state) {
+    btn.innerHTML = '';
+    if (state.content.startsWith('http')) {
+      const img = document.createElement('img');
+      img.src = state.content;
+      img.alt = state.label ?? '';
+      btn.appendChild(img);
+    } else {
+      btn.textContent = state.content;
+    }
+    btn.setAttribute('aria-label', state.label ?? state.content);
+  }
+
+  render(msb.currentState);
+  btn.addEventListener('click', () => { const s = msb.advance(); render(s); });
+  msb.onStateChange(({ state }) => render(state));
+  return btn;
+}
+
+function addCard({ title, states, initialIndex = 0, log }) {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const label = document.createElement('div');
+  label.className = 'card-title';
+  label.textContent = title;
+
+  const msb = new MultiStateButton(states, initialIndex);
+  const btn = makeButton(card, msb);
+
+  const logEl = document.createElement('div');
+  logEl.className = 'card-log';
+  logEl.textContent = log ? `→ ${msb.currentState.label ?? msb.currentState.content}` : '';
+
+  if (log) {
+    msb.onStateChange(({ state }) => {
+      logEl.textContent = `→ ${state.label ?? state.content}`;
+    });
+  }
+
+  card.append(label, btn, logEl);
+  document.getElementById('demo-grid').appendChild(card);
+}
+
+// ── Examples ──────────────────────────────────────────────────────────────────
+addCard({
+  title: 'Mood Selector',
+  log: true,
+  states: [
+    { content: '😊', label: 'Happy'   },
+    { content: '😐', label: 'Neutral' },
+    { content: '😢', label: 'Sad'     },
+    { content: '😠', label: 'Angry'   },
+    { content: '🤩', label: 'Excited' },
+  ]
+});
+
+addCard({
+  title: 'Moon Phases',
+  log: true,
+  states: [
+    { content: '🌑', label: 'New Moon'        },
+    { content: '🌒', label: 'Waxing Crescent' },
+    { content: '🌓', label: 'First Quarter'   },
+    { content: '🌔', label: 'Waxing Gibbous'  },
+    { content: '🌕', label: 'Full Moon'        },
+    { content: '🌖', label: 'Waning Gibbous'  },
+    { content: '🌗', label: 'Last Quarter'    },
+    { content: '🌘', label: 'Waning Crescent' },
+  ]
+});
+
+addCard({
+  title: 'Recording State',
+  log: true,
+  states: [
+    { content: '⏺', label: 'Ready'     },
+    { content: '🔴', label: 'Recording' },
+    { content: '⏸', label: 'Paused'    },
+  ]
+});
+
+addCard({
+  title: 'Country Flags',
+  log: true,
+  states: [
+    { content: '🇺🇸', label: 'United States' },
+    { content: '🇬🇧', label: 'United Kingdom' },
+    { content: '🇩🇪', label: 'Germany'       },
+    { content: '🇯🇵', label: 'Japan'         },
+    { content: '🇧🇷', label: 'Brazil'        },
+  ]
+});
+
+addCard({
+  title: 'Image Toggle',
+  log: false,
+  states: [
+    { content: 'https://picsum.photos/seed/on/80/80',  label: 'Image A' },
+    { content: 'https://picsum.photos/seed/off/80/80', label: 'Image B' },
+    { content: 'https://picsum.photos/seed/mid/80/80', label: 'Image C' },
+  ]
+});
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.code-block').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  const block = document.getElementById('tab-' + id);
+  if (block) {
+    block.classList.add('active');
+    event.target.classList.add('active');
+  }
+}
+
+// ── Smooth scroll nav ─────────────────────────────────────────────────────────
+document.querySelectorAll('nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
