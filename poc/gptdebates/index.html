@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT Debates — Can You Tell AI from Human?</title>
+  <meta name="description" content="Two sides of a debate. One is ChatGPT. One is human. Can you tell which is which?">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f8f7f4;--card:#fff;--border:#e0ddd6;--text:#1a1a1a;
+      --muted:#6b6860;--blue:#2563eb;--green:#16a34a;--red:#dc2626;
+      --gold:#d97706;--accent:#7c3aed;--chip:#f0eee8;
+    }
+    body{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh}
+
+    /* ── hero ── */
+    .hero{background:var(--text);color:#fff;text-align:center;padding:3.5rem 1.5rem 3rem;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,#4c1d95 0%,transparent 60%)}
+    .hero *{position:relative}
+    .badge{display:inline-block;background:rgba(124,58,237,.25);border:1px solid rgba(124,58,237,.5);color:#c4b5fd;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .85rem;border-radius:999px;margin-bottom:1.25rem;font-family:system-ui,sans-serif}
+    h1{font-size:clamp(1.9rem,5vw,3.2rem);font-weight:400;font-style:italic;line-height:1.15;margin-bottom:.75rem}
+    h1 em{color:#c4b5fd;font-style:normal}
+    .hero-sub{font-size:1rem;color:#9ca3af;max-width:480px;margin:0 auto 1.5rem;font-family:system-ui,sans-serif;line-height:1.6}
+    .score-strip{display:inline-flex;gap:2rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.6rem 1.5rem;font-family:system-ui,sans-serif;font-size:.85rem}
+    .score-item{text-align:center}
+    .score-num{font-size:1.4rem;font-weight:800;color:#c4b5fd;display:block}
+    .score-lbl{color:#6b7280;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em}
+
+    /* ── main ── */
+    main{max-width:780px;margin:0 auto;padding:3rem 1.5rem}
+
+    /* ── debate card ── */
+    .debate-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:2rem;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .debate-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .debate-topic{font-size:1.1rem;font-weight:700;font-family:system-ui,sans-serif;flex:1}
+    .debate-num{font-size:.75rem;color:var(--muted);font-family:system-ui,sans-serif;background:var(--chip);padding:.25rem .65rem;border-radius:999px;white-space:nowrap}
+
+    .sides{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .side{padding:1.5rem;cursor:pointer;transition:background .15s;border:3px solid transparent;position:relative}
+    .side:first-child{border-right:1px solid var(--border)}
+    .side:hover{background:#fafaf8}
+    .side.selected-a{border-color:var(--blue)!important;background:#eff6ff}
+    .side.selected-b{border-color:var(--accent)!important;background:#faf5ff}
+    .side.correct{border-color:var(--green)!important;background:#f0fdf4}
+    .side.wrong{border-color:var(--red)!important;background:#fef2f2}
+    .side.revealed-gpt{border-color:var(--accent)!important}
+    .side.revealed-human{border-color:var(--gold)!important}
+
+    .side-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:system-ui,sans-serif;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+    .side-dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+    .side-a .side-dot{color:var(--blue)}
+    .side-b .side-dot{color:var(--accent)}
+    .side-text{font-size:.92rem;line-height:1.7;color:var(--text)}
+
+    .side-reveal{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);display:none;font-size:.8rem;font-family:system-ui,sans-serif;line-height:1.5}
+    .side-reveal.show{display:block}
+    .reveal-chip{display:inline-block;padding:.2rem .6rem;border-radius:999px;font-weight:700;font-size:.7rem;margin-bottom:.4rem}
+    .chip-gpt{background:#ede9fe;color:#6d28d9}
+    .chip-human{background:#fef3c7;color:#b45309}
+    .reveal-tell{color:var(--muted)}
+
+    .debate-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .guess-prompt{font-size:.85rem;color:var(--muted);font-family:system-ui,sans-serif}
+    .guess-btn{background:var(--text);color:#fff;border:none;border-radius:8px;padding:.5rem 1.25rem;font-size:.85rem;font-weight:700;font-family:system-ui,sans-serif;cursor:pointer;transition:background .15s}
+    .guess-btn:disabled{background:#d1d5db;cursor:not-allowed}
+    .guess-btn:hover:not(:disabled){background:#374151}
+    .result-msg{font-size:.9rem;font-family:system-ui,sans-serif;font-weight:700;display:none}
+    .result-msg.show{display:block}
+    .msg-correct{color:var(--green)}
+    .msg-wrong{color:var(--red)}
+
+    /* ── final screen ── */
+    .final{display:none;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:3rem 2rem}
+    .final.show{display:block}
+    .final-score{font-size:4rem;font-weight:900;font-family:system-ui,sans-serif;color:var(--accent);line-height:1;margin-bottom:.5rem}
+    .final-label{font-size:1.1rem;color:var(--muted);margin-bottom:1.5rem;font-family:system-ui,sans-serif}
+    .final-verdict{font-size:1.25rem;font-style:italic;margin-bottom:2rem;color:var(--text)}
+    .share-row{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
+    .share-btn{padding:.6rem 1.25rem;border-radius:8px;font-size:.85rem;font-weight:700;font-family:system-ui,sans-serif;cursor:pointer;border:none;transition:opacity .15s}
+    .share-btn:hover{opacity:.85}
+    .btn-twitter{background:#000;color:#fff}
+    .btn-copy{background:var(--chip);color:var(--text);border:1px solid var(--border)}
+    .replay-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:.75rem 2rem;font-size:1rem;font-weight:700;font-family:system-ui,sans-serif;cursor:pointer}
+    .replay-btn:hover{background:#6d28d9}
+
+    /* ── affiliate strip ── */
+    .affiliate-strip{background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-top:2.5rem;text-align:center}
+    .aff-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:system-ui,sans-serif;margin-bottom:.75rem;display:block}
+    .aff-links{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+    .aff-link{font-size:.82rem;color:var(--blue);text-decoration:none;font-family:system-ui,sans-serif;font-weight:600;padding:.3rem .75rem;background:#eff6ff;border-radius:6px;transition:background .15s}
+    .aff-link:hover{background:#dbeafe}
+
+    footer{text-align:center;padding:2rem;color:var(--muted);font-size:.75rem;font-family:system-ui,sans-serif;border-top:1px solid var(--border)}
+
+    @media(max-width:600px){
+      .sides{grid-template-columns:1fr}
+      .side:first-child{border-right:none;border-bottom:1px solid var(--border)}
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">🤖 10 Rounds · New debates weekly</div>
+  <h1>GPT <em>Debates</em></h1>
+  <p class="hero-sub">Two sides of a debate. One was written by ChatGPT. One by a human. Read both — then guess.</p>
+  <div class="score-strip">
+    <div class="score-item"><span class="score-num" id="h-correct">0</span><span class="score-lbl">Correct</span></div>
+    <div class="score-item"><span class="score-num" id="h-total">0</span><span class="score-lbl">Answered</span></div>
+    <div class="score-item"><span class="score-num" id="h-pct">—</span><span class="score-lbl">Accuracy</span></div>
+  </div>
+</div>
+
+<main>
+<div id="debates-container"></div>
+<div class="final" id="final-screen">
+  <div class="final-score" id="final-score"></div>
+  <div class="final-label">out of 10</div>
+  <div class="final-verdict" id="final-verdict"></div>
+  <div class="share-row">
+    <button class="share-btn btn-twitter" onclick="shareTwitter()">Share on X</button>
+    <button class="share-btn btn-copy" onclick="copyResult()">Copy result</button>
+  </div>
+  <button class="replay-btn" onclick="location.reload()">Play again</button>
+</div>
+<div class="affiliate-strip">
+  <span class="aff-label">Want to go deeper on AI?</span>
+  <div class="aff-links">
+    <a class="aff-link" href="https://www.jasper.ai" target="_blank" rel="noopener">Jasper AI — write 10x faster</a>
+    <a class="aff-link" href="https://copy.ai" target="_blank" rel="noopener">Copy.ai — AI copywriting</a>
+    <a class="aff-link" href="https://www.writesonic.com" target="_blank" rel="noopener">Writesonic — SEO content</a>
+    <a class="aff-link" href="https://www.coursera.org/learn/prompt-engineering" target="_blank" rel="noopener">Prompt Engineering course</a>
+  </div>
+</div>
+</main>
+
+<footer>gptdebates.com &nbsp;·&nbsp; New debates every Friday &nbsp;·&nbsp; Not affiliated with OpenAI</footer>
+
+<script>
+const DEBATES = [
+  {
+    topic: "Should governments regulate social media platforms?",
+    sideA: {
+      text: "Social media regulation is long overdue. These platforms have become the public square, yet they operate with zero accountability. When a newspaper publishes lies, there are consequences. Facebook doesn't have those. We regulate TV, radio, and print — why not the thing billions of people spend six hours a day on? The argument that regulation stifles free speech is a red herring used by billionaires who profit from outrage.",
+      isGpt: false,
+      tell: "Personal frustration, rhetorical questions, direct attack on billionaires — hallmarks of human editorial writing."
+    },
+    sideB: {
+      text: "The question of government regulation of social media platforms involves a careful balance between protecting users from harm and preserving fundamental principles of free expression. Proponents argue that regulation is necessary to combat misinformation and protect vulnerable populations. Critics, however, contend that government oversight introduces risks of censorship and could undermine the open exchange of ideas. A nuanced regulatory framework — one that establishes accountability without dictating content — may represent the most viable path forward.",
+      isGpt: true,
+      tell: "Balanced structure, 'proponents argue / critics contend', 'nuanced framework', avoids personal opinion — classic GPT hedging."
+    }
+  },
+  {
+    topic: "Is remote work better than office work?",
+    sideA: {
+      text: "Remote work is objectively better for most knowledge workers, and the data backs this up. I get two hours of my life back every day just from not commuting. I'm more focused, I eat better, and I've actually seen my team's output increase since we went remote. Yes, some people miss the office — usually the ones who live alone or whose home life is chaotic. But those are edge cases, not reasons to drag everyone back in.",
+      isGpt: false,
+      tell: "Personal anecdote ('I get two hours back'), specific detail ('eat better'), opinionated dismissal of counterarguments as 'edge cases'."
+    },
+    sideB: {
+      text: "Remote work offers significant advantages in autonomy, focus, and work-life integration, while office environments provide benefits in spontaneous collaboration, mentorship, and clearer boundaries between professional and personal life. Research suggests that hybrid models often capture the strengths of both arrangements. The optimal setup depends heavily on individual role requirements, team dynamics, and personal circumstances — making it difficult to declare either approach universally superior.",
+      isGpt: true,
+      tell: "'Research suggests', 'optimal setup depends heavily on', 'difficult to declare either universally superior' — GPT never picks a side."
+    }
+  },
+  {
+    topic: "Should AI-generated art be allowed in competitions?",
+    sideA: {
+      text: "No, full stop. I've been a working illustrator for eleven years. I studied. I practiced. I starved through my twenties to get good at this. When an AI scrapes my work, remixes it, and enters it in a competition under someone else's name — that's not creativity, that's theft with extra steps. Competitions exist to celebrate human skill and effort. If you want to enter an AI image, make an AI competition. Leave ours alone.",
+      isGpt: false,
+      tell: "Personal history, emotional stakes, 'theft with extra steps', direct demand — raw human voice with professional grievance."
+    },
+    sideB: {
+      text: "The inclusion of AI-generated art in competitions raises important questions about the definition of creativity and authorship. Supporters argue that AI is simply a new medium, much like photography was once dismissed as 'not real art.' Opponents emphasize that competitions historically reward human skill, effort, and intent — qualities not clearly present in AI generation. Most competition organisers are now developing specific policies to address this, reflecting the broader societal negotiation around AI's role in creative fields.",
+      isGpt: true,
+      tell: "'Raises important questions', photography analogy framed as 'supporters argue', 'broader societal negotiation' — GPT stays above the fray."
+    }
+  },
+  {
+    topic: "Is cryptocurrency a legitimate investment?",
+    sideA: {
+      text: "My brother-in-law made fun of me for buying Bitcoin in 2020. He's not laughing anymore. Look, crypto is volatile — I know that. But so is any early-stage technology. People said the same thing about the internet in 1995. The difference is, this time the technology actually challenges who controls money, and that matters. Will some coins go to zero? Yes. Should you put your rent money in it? No. But writing it off entirely is just lazy thinking.",
+      isGpt: false,
+      tell: "Personal story, specific year, 'my brother-in-law', qualified opinion ('don't put your rent money in it') — human hedging feels different from GPT hedging."
+    },
+    sideB: {
+      text: "Cryptocurrency occupies a contested space in modern investment theory. Proponents point to its decentralised nature, potential for asymmetric returns, and role as an inflation hedge. Sceptics highlight extreme volatility, regulatory uncertainty, and the lack of underlying cash flows that traditional valuation methods rely on. Whether cryptocurrency constitutes a 'legitimate' investment largely depends on one's risk tolerance, time horizon, and confidence in the underlying technology's long-term adoption — criteria that vary substantially across investor profiles.",
+      isGpt: true,
+      tell: "'Occupies a contested space', 'largely depends on', 'criteria that vary substantially' — GPT frames everything as context-dependent."
+    }
+  },
+  {
+    topic: "Should college be free?",
+    sideA: {
+      text: "I'm 34 and still paying off my student loans. I'll be paying until I'm 48. I went to a state school, studied something practical, and I'm still underwater. Meanwhile, the college raised tuition by 40% in the four years I was there. The idea that this system is fine and free college is some radical socialist fantasy is insane to me. Germany does it. Finland does it. Norway does it. We choose not to because someone profits from the debt.",
+      isGpt: false,
+      tell: "Specific ages, personal financial detail, escalating frustration, international comparisons framed as an accusation — raw human experience."
+    },
+    sideB: {
+      text: "Advocates for free college argue that reducing financial barriers would expand access to higher education, reduce inequality, and stimulate long-term economic growth through a more educated workforce. Critics question the fiscal sustainability of such programmes, raise concerns about institutional incentives when government funding is guaranteed, and note that direct subsidies may disproportionately benefit higher-income students who attend four-year universities. Income-contingent loan models and targeted grant expansion have emerged as alternative approaches that aim to balance access with fiscal responsibility.",
+      isGpt: true,
+      tell: "'Advocates argue / critics question', three structured sub-points, 'income-contingent loan models', 'balance access with fiscal responsibility' — textbook GPT structure."
+    }
+  },
+  {
+    topic: "Is social media causing mental health issues in teenagers?",
+    sideA: {
+      text: "I watched my daughter go from a confident, funny kid to someone who spent three hours a night comparing herself to influencers. Her grades dropped. She stopped hanging out with friends. She started asking for filters in real-life photos. We eventually deleted Instagram and things genuinely improved. I don't need a study to tell me what I watched happen in my own house over two years. The research is also pretty clear, but lived experience is enough for me.",
+      isGpt: false,
+      tell: "Specific, personal, protective parent voice, 'I don't need a study' but then cites research anyway — classic human self-contradiction that adds authenticity."
+    },
+    sideB: {
+      text: "Research on social media's impact on adolescent mental health presents a complex picture. Several large-scale studies have found correlations between heavy social media use and increased rates of anxiety and depression, particularly among teenage girls. However, researchers caution that correlation does not imply causation, and that other variables — including pre-existing mental health conditions and overall screen time — complicate simple conclusions. Platforms' design choices, including algorithmic amplification of appearance-focused content, are increasingly cited as mechanisms of potential harm, prompting calls for age verification and design regulation.",
+      isGpt: true,
+      tell: "'Correlation does not imply causation', 'complex picture', 'researchers caution' — GPT compulsively adds epistemic caveats."
+    }
+  },
+  {
+    topic: "Should voting be mandatory?",
+    sideA: {
+      text: "Mandatory voting sounds nice on paper but it's fundamentally anti-democratic. Democracy means the right to participate — and logically, it also means the right not to. If someone doesn't care enough to vote, forcing them to fills ballots with random choices from disengaged citizens. That doesn't improve democracy, it just inflates turnout numbers. Australia has mandatory voting and still has massive political apathy. The fix for low turnout is making voting easier, not compulsory.",
+      isGpt: false,
+      tell: "Logical deduction chain, specific country example (Australia), 'sounds nice on paper' — experienced debater's framing with real-world grounding."
+    },
+    sideB: {
+      text: "Mandatory voting, practised in countries such as Australia, Belgium, and Brazil, raises fundamental questions about the nature of civic obligation. Proponents contend that universal participation produces governments more representative of the full population, reduces the outsized influence of highly motivated partisan blocs, and fosters a culture of civic engagement. Opponents argue that compelled voting infringes on individual liberty, may produce uninformed ballot choices, and treats a symptom rather than the underlying causes of political disengagement. Ranked-choice and other electoral reforms are sometimes proposed as complementary or alternative measures.",
+      isGpt: true,
+      tell: "Opening with three countries, 'proponents contend / opponents argue' binary, 'treats a symptom rather than the underlying cause' — GPT loves this kind of summative framing."
+    }
+  },
+  {
+    topic: "Should billionaires be allowed to exist?",
+    sideA: {
+      text: "Nobody earns a billion dollars. They extract it. Bezos didn't work a billion times harder than his warehouse workers — he built systems that capture the value those workers create. The existence of billionaires is, by definition, a policy failure. It means our tax and labour systems have been so thoroughly captured by capital that wealth accumulates faster than it can be redistributed. I don't hate rich people. I hate a system that makes extreme wealth structurally inevitable.",
+      isGpt: false,
+      tell: "Bezos by name, 'extract it' vs 'earn it' framing, 'I don't hate rich people' self-correction, passionate systemic critique — human intellectual anger."
+    },
+    sideB: {
+      text: "The ethics of extreme wealth concentration sits at the intersection of economics, political philosophy, and social values. Critics argue that billionaire-level wealth represents a fundamental failure of redistributive systems, enabling disproportionate influence over political processes and media. Defenders contend that concentrated capital drives innovation, risk-taking, and job creation that benefits broader society, and that targeting wealth rather than behaviour conflates outcomes with intent. Progressive wealth taxation, stronger antitrust enforcement, and enhanced worker ownership models are among the policy mechanisms most frequently proposed to address the underlying dynamics.",
+      isGpt: true,
+      tell: "'Sits at the intersection of', 'critics argue / defenders contend', five policy mechanisms listed at the end — GPT ends with a solution menu."
+    }
+  },
+  {
+    topic: "Is space exploration worth the cost?",
+    sideA: {
+      text: "Every dollar NASA spends returns about $7 to the economy in spinoff technologies — GPS, memory foam, water filtration, scratch-resistant lenses. But honestly, even if that weren't true, we should go anyway. Earth is one rock. We are one extinction event away from oblivion. The question isn't whether we can afford space exploration — it's whether we can afford to stay stuck on a single planet. Short-term thinking is the most expensive thing humans do.",
+      isGpt: false,
+      tell: "Specific ROI figure ('$7'), personal examples (memory foam, GPS), 'one rock', 'short-term thinking is the most expensive thing' — pithy, declarative, human editorial."
+    },
+    sideB: {
+      text: "Space exploration represents both a significant financial investment and a source of substantial long-term returns — in scientific knowledge, technological innovation, and national strategic positioning. Critics argue that resources should instead address more immediate terrestrial challenges such as poverty, climate change, and public health. Proponents counter that space investment generates economic multiplier effects, drives STEM engagement, and ultimately secures humanity's long-term survival potential. The debate often reflects broader disagreements about time horizons in public policy: short-term needs versus long-term civilisational investment.",
+      isGpt: true,
+      tell: "'Significant financial investment and substantial long-term returns', 'critics argue / proponents counter', 'civilisational investment' — GPT scales everything to civilisation."
+    }
+  },
+  {
+    topic: "Is fast food bad for society?",
+    sideA: {
+      text: "I grew up poor. Fast food wasn't a choice — it was the only thing we could afford that actually fed four people. A $5 McDonald's meal versus a $40 bag of groceries that needs cooking when you work two jobs? That's not a hard decision. The people who demonise fast food have never had to make that calculation. The problem isn't McDonald's — it's poverty, food deserts, and the fact that unhealthy food is the cheapest food. Fix that first.",
+      isGpt: false,
+      tell: "Personal poverty narrative, specific price comparison ($5 vs $40), 'people who demonise fast food have never' — empathy-as-argument, defensive and lived-in."
+    },
+    sideB: {
+      text: "Fast food's societal impact is multifaceted. From a public health perspective, the high prevalence of ultra-processed, calorie-dense foods contributes to rising rates of obesity, type 2 diabetes, and cardiovascular disease. Economically, however, fast food provides affordable caloric access in communities with limited grocery infrastructure, known as food deserts. The industry also employs millions in entry-level roles that serve as economic entry points for young and low-income workers. Systemic reform — including subsidies for fresh produce, nutritional labelling requirements, and zoning policies — is more frequently proposed than outright restriction.",
+      isGpt: true,
+      tell: "'Multifaceted', 'from a public health perspective / economically however', 'systemic reform... more frequently proposed than outright restriction' — GPT ends with policy, not opinion."
+    }
+  }
+];
+
+// shuffle and assign random A/B positions
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+let score = 0, answered = 0;
+const order = shuffle(DEBATES.map((_, i) => i));
+let rendered = [];
+
+function updateHeader() {
+  document.getElementById('h-correct').textContent = score;
+  document.getElementById('h-total').textContent = answered;
+  document.getElementById('h-pct').textContent = answered
+    ? Math.round(score / answered * 100) + '%' : '—';
+}
+
+function selectSide(debateIdx, side) {
+  const d = rendered[debateIdx];
+  if (d.answered) return;
+  d.selected = side;
+  d.elA.classList.remove('selected-a','selected-b');
+  d.elB.classList.remove('selected-a','selected-b');
+  (side === 'A' ? d.elA : d.elB).classList.add(side === 'A' ? 'selected-a' : 'selected-b');
+  d.guessBtn.disabled = false;
+}
+
+function submitGuess(debateIdx) {
+  const d = rendered[debateIdx];
+  if (d.answered || !d.selected) return;
+  d.answered = true;
+  d.guessBtn.disabled = true;
+
+  const debate = d.data;
+  // which side is GPT?
+  const gptSide = (d.flipped ? !debate.sideA.isGpt : debate.sideA.isGpt) ? 'A' : 'B';
+  const correct = d.selected === gptSide;
+
+  if (correct) {
+    score++;
+    d.resultMsg.textContent = '✅ Correct — that was GPT!';
+    d.resultMsg.className = 'result-msg show msg-correct';
+    (d.selected === 'A' ? d.elA : d.elB).classList.add('correct');
+  } else {
+    d.resultMsg.textContent = '❌ Nope — that was the human!';
+    d.resultMsg.className = 'result-msg show msg-wrong';
+    (d.selected === 'A' ? d.elA : d.elB).classList.add('wrong');
+  }
+
+  // reveal both sides
+  d.elA.classList.add(d.dataA.isGpt ? 'revealed-gpt' : 'revealed-human');
+  d.elB.classList.add(d.dataB.isGpt ? 'revealed-gpt' : 'revealed-human');
+  d.revealA.classList.add('show');
+  d.revealB.classList.add('show');
+
+  answered++;
+  updateHeader();
+
+  if (answered === DEBATES.length) {
+    setTimeout(() => {
+      document.getElementById('final-screen').classList.add('show');
+      document.getElementById('final-score').textContent = score + '/10';
+      const verdicts = [
+        [0,3,'Even the best AIs fool people. Maybe that\'s the point.'],
+        [4,5,'You\'ve got an eye for it — but GPT is getting better.'],
+        [6,7,'Solid. You noticed the patterns most people miss.'],
+        [8,9,'Sharp. Very few people score this high.'],
+        [10,10,'Perfect score. You\'re either a prompt engineer or a robot yourself.']
+      ];
+      for (const [lo,hi,msg] of verdicts) {
+        if (score >= lo && score <= hi) {
+          document.getElementById('final-verdict').textContent = '"' + msg + '"';
+          break;
+        }
+      }
+    }, 600);
+  }
+}
+
+function shareTwitter() {
+  const text = `I scored ${score}/10 on GPT Debates — can YOU tell AI from human? gptdebates.com`;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
+function copyResult() {
+  navigator.clipboard.writeText(`I scored ${score}/10 on GPT Debates. Try it: gptdebates.com`);
+  alert('Copied!');
+}
+
+// ── render ──────────────────────────────────────────────────────────────────
+const container = document.getElementById('debates-container');
+order.forEach((origIdx, i) => {
+  const debate = DEBATES[origIdx];
+  const flipped = Math.random() < 0.5;
+  const dataA = flipped ? debate.sideB : debate.sideA;
+  const dataB = flipped ? debate.sideA : debate.sideB;
+
+  const card = document.createElement('div');
+  card.className = 'debate-card';
+  card.innerHTML = `
+    <div class="debate-header">
+      <div class="debate-topic">${debate.topic}</div>
+      <div class="debate-num">Debate ${i+1} of ${DEBATES.length}</div>
+    </div>
+    <div class="sides">
+      <div class="side side-a" onclick="selectSide(${i},'A')">
+        <div class="side-label"><span class="side-dot"></span> Side A</div>
+        <div class="side-text">${dataA.text}</div>
+        <div class="side-reveal" id="reveal-${i}-a">
+          <span class="reveal-chip ${dataA.isGpt ? 'chip-gpt':'chip-human'}">${dataA.isGpt ? '🤖 This was GPT':'👤 This was Human'}</span>
+          <div class="reveal-tell">${dataA.tell}</div>
+        </div>
+      </div>
+      <div class="side side-b" onclick="selectSide(${i},'B')">
+        <div class="side-label"><span class="side-dot"></span> Side B</div>
+        <div class="side-text">${dataB.text}</div>
+        <div class="side-reveal" id="reveal-${i}-b">
+          <span class="reveal-chip ${dataB.isGpt ? 'chip-gpt':'chip-human'}">${dataB.isGpt ? '🤖 This was GPT':'👤 This was Human'}</span>
+          <div class="reveal-tell">${dataB.tell}</div>
+        </div>
+      </div>
+    </div>
+    <div class="debate-footer">
+      <div class="guess-prompt" id="prompt-${i}">Click a side — which one is GPT?</div>
+      <div class="result-msg" id="result-${i}"></div>
+      <button class="guess-btn" id="btn-${i}" disabled onclick="submitGuess(${i})">Lock in →</button>
+    </div>
+  `;
+  container.appendChild(card);
+
+  rendered.push({
+    data: debate, dataA, dataB, flipped,
+    selected: null, answered: false,
+    elA: card.querySelector('.side-a'),
+    elB: card.querySelector('.side-b'),
+    revealA: card.querySelector(`#reveal-${i}-a`),
+    revealB: card.querySelector(`#reveal-${i}-b`),
+    resultMsg: card.querySelector(`#result-${i}`),
+    guessBtn: card.querySelector(`#btn-${i}`),
+  });
+});
+</script>
+</body>
+</html>
