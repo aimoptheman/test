@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React MultiStateButton — Live Demo</title>
+
+  <!-- React 18 + Babel standalone (JSX in browser) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1f36 0%, #0d1117 100%);
+      border-bottom: 1px solid #30363d;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: #61dafb;
+      color: #000;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .25rem .7rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; }
+    .subtitle { color: #8b949e; font-size: 1rem; }
+    .subtitle a { color: #58a6ff; text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 1rem;
+      border-bottom: 1px solid #21262d;
+      background: #161b22;
+    }
+    nav a {
+      color: #8b949e;
+      text-decoration: none;
+      font-size: .9rem;
+      padding: .35rem .7rem;
+      border-radius: 6px;
+      transition: all .15s;
+    }
+    nav a:hover, nav a.active { color: #e6edf3; background: #21262d; }
+
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding-bottom: .6rem;
+      border-bottom: 1px solid #21262d;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    /* demo grid */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: #61dafb; }
+    .card-title { font-size: .85rem; color: #8b949e; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+    .card-log { font-size: .8rem; color: #3fb950; min-height: 1.2em; font-family: monospace; }
+
+    /* msb button — mirrors MultiStateButton.css */
+    .msb {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--msb-size, 4rem);
+      height: var(--msb-size, 4rem);
+      padding: 0;
+      background: var(--msb-bg, #21262d);
+      border: var(--msb-border, 2px solid #30363d);
+      border-radius: var(--msb-radius, 50%);
+      font-size: var(--msb-font-size, 1.8rem);
+      cursor: pointer;
+      transition: background .15s, transform .1s, border-color .15s;
+      user-select: none;
+      overflow: hidden;
+      color: inherit;
+    }
+    .msb:hover { background: var(--msb-bg-hover, #30363d); border-color: #61dafb; }
+    .msb:active { transform: scale(.9); }
+    .msb .msb-img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+    /* code viewer */
+    .tabs { display: flex; gap: .25rem; }
+    .tab-btn {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      color: #8b949e;
+      font-size: .8rem;
+      padding: .4rem .9rem;
+      cursor: pointer;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      transition: all .15s;
+    }
+    .tab-btn.active, .tab-btn:hover { color: #e6edf3; background: #161b22; }
+    .tab-btn.active { color: #61dafb; }
+    .code-block {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 0 6px 6px 6px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      display: none;
+    }
+    .code-block.active { display: block; }
+    pre { margin: 0; }
+    code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .82rem; line-height: 1.6; }
+
+    .kw { color: #ff7b72; }
+    .dc { color: #d2a8ff; }
+    .st { color: #a5d6ff; }
+    .cm { color: #8b949e; font-style: italic; }
+    .fn { color: #79c0ff; }
+    .nb { color: #ffa657; }
+    .cl { color: #ffa657; }
+    .jsx { color: #7ee787; }
+
+    .install-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: monospace;
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      color: #3fb950;
+      margin-bottom: 1.25rem;
+    }
+    .install-box .prompt { color: #8b949e; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; padding: .6rem .8rem; color: #8b949e; border-bottom: 1px solid #21262d; font-weight: 600; }
+    td { padding: .55rem .8rem; border-bottom: 1px solid #21262d; vertical-align: top; }
+    td:first-child { font-family: monospace; color: #a5d6ff; white-space: nowrap; }
+    td:nth-child(2) { font-family: monospace; color: #d2a8ff; }
+    tr:last-child td { border-bottom: none; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #6e7681;
+      font-size: .8rem;
+      border-top: 1px solid #21262d;
+    }
+    footer a { color: #8b949e; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">
+    <!-- React logo -->
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="12" r="2.139"/>
+      <path d="M12 7.03c4.01 0 7.67.96 10.24 2.5C24.77 11.04 26 12.8 26 14.5c0 1.7-1.23 3.46-3.76 4.97C19.67 21.04 16.01 22 12 22c-4.01 0-7.67-.96-10.24-2.53C-.77 17.96-2 16.2-2 14.5c0-1.7 1.23-3.46 3.76-4.97C4.33 8 7.99 7.03 12 7.03z" transform="scale(.46) translate(0,12)"/>
+    </svg>
+    React 18 Component
+  </div>
+  <h1>MultiStateButton</h1>
+  <p class="subtitle">
+    A button that cycles through states on each click &nbsp;·&nbsp;
+    Source: <a href="https://github.com/aimoptheman/react-components" target="_blank">aimoptheman/react-components</a>
+  </p>
+</header>
+
+<nav>
+  <a href="#demo" class="active" onclick="setActive(this)">Live Demo</a>
+  <a href="#api" onclick="setActive(this)">API</a>
+  <a href="#code" onclick="setActive(this)">Source</a>
+  <a href="#install" onclick="setActive(this)">Usage</a>
+</nav>
+
+<main>
+
+  <section id="demo">
+    <h2><span>▶</span> Live Demo</h2>
+    <div id="root"></div>
+  </section>
+
+  <section id="api">
+    <h2><span>📋</span> API Reference</h2>
+    <h3 style="color:#8b949e;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Props</h3>
+    <table style="margin-bottom:1.5rem">
+      <tr><th>Prop</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td>states</td><td>MsbState[]</td><td>✅</td><td>Ordered list of states to cycle through</td></tr>
+      <tr><td>initialIndex</td><td>number</td><td></td><td>Zero-based starting index (default 0)</td></tr>
+      <tr><td>onStateChange</td><td>(e) =&gt; void</td><td></td><td>Called after each click with new index &amp; state</td></tr>
+      <tr><td>className</td><td>string</td><td></td><td>Extra CSS class on the &lt;button&gt;</td></tr>
+      <tr><td>style</td><td>CSSProperties</td><td></td><td>Inline styles — useful for CSS var overrides</td></tr>
+    </table>
+    <h3 style="color:#8b949e;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">CSS Custom Properties</h3>
+    <table>
+      <tr><th>Property</th><th>Default</th><th>Description</th></tr>
+      <tr><td>--msb-size</td><td>3rem</td><td>Button diameter</td></tr>
+      <tr><td>--msb-bg</td><td>#f0f0f0</td><td>Background colour</td></tr>
+      <tr><td>--msb-bg-hover</td><td>#e0e0e0</td><td>Hover background</td></tr>
+      <tr><td>--msb-border</td><td>2px solid #ccc</td><td>Border</td></tr>
+      <tr><td>--msb-radius</td><td>50%</td><td>Border radius</td></tr>
+      <tr><td>--msb-font-size</td><td>1.5rem</td><td>Content font size</td></tr>
+    </table>
+  </section>
+
+  <section id="code">
+    <h2><span>📄</span> Component Source</h2>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('tsx', this)">MultiStateButton.tsx</button>
+      <button class="tab-btn" onclick="showTab('css', this)">MultiStateButton.css</button>
+      <button class="tab-btn" onclick="showTab('types', this)">types</button>
+    </div>
+
+    <div id="tab-tsx" class="code-block active"><pre><code
+><span class="kw">import</span> React, { useState, useCallback } <span class="kw">from</span> <span class="st">'react'</span>;
+<span class="kw">import</span> <span class="st">'./MultiStateButton.css'</span>;
+
+<span class="kw">export function</span> <span class="fn">MultiStateButton</span>({
+  states,
+  initialIndex = <span class="nb">0</span>,
+  onStateChange,
+  className,
+  style,
+}: MultiStateButtonProps): React.JSX.Element {
+  <span class="kw">const</span> [index, setIndex] = <span class="fn">useState</span>(initialIndex);
+  <span class="kw">const</span> current = states[index];
+  <span class="kw">const</span> isImage =
+    current.content.<span class="fn">startsWith</span>(<span class="st">'http://'</span>) ||
+    current.content.<span class="fn">startsWith</span>(<span class="st">'https://'</span>);
+
+  <span class="kw">const</span> advance = <span class="fn">useCallback</span>(() =&gt; {
+    <span class="fn">setIndex</span>(prev =&gt; {
+      <span class="kw">const</span> next = (prev + <span class="nb">1</span>) % states.length;
+      onStateChange?.({ index: next, state: states[next] });
+      <span class="kw">return</span> next;
+    });
+  }, [states, onStateChange]);
+
+  <span class="kw">return</span> (
+    <span class="jsx">&lt;button</span>
+      <span class="dc">type</span>=<span class="st">"button"</span>
+      <span class="dc">className</span>={[<span class="st">'msb'</span>, className].<span class="fn">filter</span>(Boolean).<span class="fn">join</span>(<span class="st">' '</span>)}
+      <span class="dc">aria-label</span>={current.label ?? current.content}
+      <span class="dc">onClick</span>={advance}
+      <span class="dc">style</span>={style}
+    <span class="jsx">&gt;</span>
+      {isImage ? (
+        <span class="jsx">&lt;img</span> <span class="dc">src</span>={current.content} <span class="dc">alt</span>={current.label ?? <span class="st">''</span>} <span class="dc">className</span>=<span class="st">"msb-img"</span> <span class="jsx">/&gt;</span>
+      ) : (
+        <span class="jsx">&lt;span&gt;</span>{current.content}<span class="jsx">&lt;/span&gt;</span>
+      )}
+    <span class="jsx">&lt;/button&gt;</span>
+  );
+}</code></pre></div>
+
+    <div id="tab-css" class="code-block"><pre><code
+><span class="fn">.msb</span> {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: <span class="fn">var</span>(<span class="kw">--msb-size</span>, <span class="nb">3rem</span>);
+  height: <span class="fn">var</span>(<span class="kw">--msb-size</span>, <span class="nb">3rem</span>);
+  padding: <span class="nb">0</span>;
+  background: <span class="fn">var</span>(<span class="kw">--msb-bg</span>, <span class="nb">#f0f0f0</span>);
+  border: <span class="fn">var</span>(<span class="kw">--msb-border</span>, <span class="nb">2px solid #ccc</span>);
+  border-radius: <span class="fn">var</span>(<span class="kw">--msb-radius</span>, <span class="nb">50%</span>);
+  font-size: <span class="fn">var</span>(<span class="kw">--msb-font-size</span>, <span class="nb">1.5rem</span>);
+  cursor: pointer;
+  transition: background <span class="nb">.15s</span> ease, transform <span class="nb">.1s</span> ease;
+  user-select: none;
+  overflow: hidden;
+}
+<span class="fn">.msb:hover</span>  { background: <span class="fn">var</span>(<span class="kw">--msb-bg-hover</span>, <span class="nb">#e0e0e0</span>); }
+<span class="fn">.msb:active</span> { transform: <span class="fn">scale</span>(<span class="nb">.92</span>); }
+<span class="fn">.msb-img</span>    { width: <span class="nb">100%</span>; height: <span class="nb">100%</span>; object-fit: cover; border-radius: inherit; }</code></pre></div>
+
+    <div id="tab-types" class="code-block"><pre><code
+><span class="kw">export interface</span> <span class="cl">MsbState</span> {
+  <span class="cm">/** Emoji, plain text, or an https:// image URL. */</span>
+  content: <span class="kw">string</span>;
+  <span class="cm">/** Used for aria-label; falls back to content. */</span>
+  label?: <span class="kw">string</span>;
+}
+
+<span class="kw">export interface</span> <span class="cl">MsbStateChangeEvent</span> {
+  index: <span class="kw">number</span>;
+  state: <span class="cl">MsbState</span>;
+}
+
+<span class="kw">export interface</span> <span class="cl">MultiStateButtonProps</span> {
+  states: <span class="cl">MsbState</span>[];
+  initialIndex?: <span class="kw">number</span>;
+  onStateChange?: (event: <span class="cl">MsbStateChangeEvent</span>) =&gt; <span class="kw">void</span>;
+  className?: <span class="kw">string</span>;
+  style?: React.CSSProperties;
+}</code></pre></div>
+  </section>
+
+  <section id="install">
+    <h2><span>🚀</span> Installation &amp; Usage</h2>
+    <div class="install-box">
+      <span class="prompt">$</span> npm install @aimoptheman/react-components
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('usage', this)">App.tsx</button>
+    </div>
+    <div id="tab-usage" class="code-block active"><pre><code
+><span class="kw">import</span> { MultiStateButton } <span class="kw">from</span> <span class="st">'@aimoptheman/react-components'</span>;
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> moods = [
+    { content: <span class="st">'😊'</span>, label: <span class="st">'Happy'</span>   },
+    { content: <span class="st">'😐'</span>, label: <span class="st">'Neutral'</span> },
+    { content: <span class="st">'😢'</span>, label: <span class="st">'Sad'</span>     },
+    { content: <span class="st">'😠'</span>, label: <span class="st">'Angry'</span>   },
+    { content: <span class="st">'🤩'</span>, label: <span class="st">'Excited'</span> },
+  ];
+
+  <span class="kw">return</span> (
+    <span class="jsx">&lt;MultiStateButton</span>
+      <span class="dc">states</span>={moods}
+      <span class="dc">onStateChange</span>={({ index, state }) =&gt;
+        console.<span class="fn">log</span>(<span class="st">`State </span>${index}<span class="st">: </span>${state.label}<span class="st">`</span>)
+      }
+    <span class="jsx">/&gt;</span>
+  );
+}</code></pre></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://github.com/aimoptheman/react-components" target="_blank">Source</a> &nbsp;·&nbsp;
+    <a href="https://aimoptheman.github.io/test/" target="_blank">Vanilla JS Demo</a> &nbsp;·&nbsp;
+    <a href="https://aimoptheman.github.io/test/demo/angular-multi-state-button.html" target="_blank">Angular Demo</a> &nbsp;·&nbsp;
+    Built with React 18
+  </p>
+</footer>
+
+<!-- ── Actual React App (runs in browser via Babel) ─────────────────────────── -->
+<script type="text/babel">
+  const { useState, useCallback } = React;
+
+  // ── MultiStateButton component (mirrors MultiStateButton.tsx exactly) ──────
+  function MultiStateButton({ states, initialIndex = 0, onStateChange, style }) {
+    const [index, setIndex] = useState(initialIndex);
+    const current = states[index];
+    const isImage =
+      current.content.startsWith('http://') ||
+      current.content.startsWith('https://');
+
+    const advance = useCallback(() => {
+      setIndex(prev => {
+        const next = (prev + 1) % states.length;
+        onStateChange?.({ index: next, state: states[next] });
+        return next;
+      });
+    }, [states, onStateChange]);
+
+    return (
+      <button
+        type="button"
+        className="msb"
+        aria-label={current.label ?? current.content}
+        onClick={advance}
+        style={style}
+      >
+        {isImage
+          ? <img src={current.content} alt={current.label ?? ''} className="msb-img" />
+          : <span>{current.content}</span>
+        }
+      </button>
+    );
+  }
+
+  // ── Demo card wrapper ──────────────────────────────────────────────────────
+  function DemoCard({ title, states, initialIndex = 0, showLog = true }) {
+    const [log, setLog] = useState(
+      showLog ? (states[initialIndex].label ?? states[initialIndex].content) : ''
+    );
+
+    return (
+      <div className="card">
+        <div className="card-title">{title}</div>
+        <MultiStateButton
+          states={states}
+          initialIndex={initialIndex}
+          onStateChange={({ state }) =>
+            showLog && setLog(state.label ?? state.content)
+          }
+        />
+        <div className="card-log">{log ? `→ ${log}` : ''}</div>
+      </div>
+    );
+  }
+
+  // ── Full demo app ──────────────────────────────────────────────────────────
+  function App() {
+    return (
+      <div className="demo-grid">
+        <DemoCard title="Mood Selector" states={[
+          { content: '😊', label: 'Happy'   },
+          { content: '😐', label: 'Neutral' },
+          { content: '😢', label: 'Sad'     },
+          { content: '😠', label: 'Angry'   },
+          { content: '🤩', label: 'Excited' },
+        ]} />
+        <DemoCard title="Moon Phases" states={[
+          { content: '🌑', label: 'New Moon'        },
+          { content: '🌒', label: 'Waxing Crescent' },
+          { content: '🌓', label: 'First Quarter'   },
+          { content: '🌔', label: 'Waxing Gibbous'  },
+          { content: '🌕', label: 'Full Moon'        },
+          { content: '🌖', label: 'Waning Gibbous'  },
+          { content: '🌗', label: 'Last Quarter'    },
+          { content: '🌘', label: 'Waning Crescent' },
+        ]} />
+        <DemoCard title="Recording State" states={[
+          { content: '⏺', label: 'Ready'     },
+          { content: '🔴', label: 'Recording' },
+          { content: '⏸', label: 'Paused'    },
+        ]} />
+        <DemoCard title="Country Flags" states={[
+          { content: '🇺🇸', label: 'United States'  },
+          { content: '🇬🇧', label: 'United Kingdom' },
+          { content: '🇩🇪', label: 'Germany'        },
+          { content: '🇯🇵', label: 'Japan'          },
+          { content: '🇧🇷', label: 'Brazil'         },
+        ]} />
+        <DemoCard title="Image Toggle" showLog={false} states={[
+          { content: 'https://picsum.photos/seed/on/80/80',  label: 'Image A' },
+          { content: 'https://picsum.photos/seed/off/80/80', label: 'Image B' },
+          { content: 'https://picsum.photos/seed/mid/80/80', label: 'Image C' },
+        ]} />
+      </div>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App />);
+</script>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.code-block').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    const block = document.getElementById('tab-' + id);
+    if (block) { block.classList.add('active'); btn.classList.add('active'); }
+  }
+  function setActive(a) {
+    event.preventDefault();
+    document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
