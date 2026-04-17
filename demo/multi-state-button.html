@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MultiStateButton — Demo</title>
+  <link rel="stylesheet" href="../components/multi-state-button/MultiStateButton.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f7f7f9;
+      color: #222;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      padding: 2rem;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      padding: 2rem 2.5rem;
+      width: min(100%, 420px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    h2 { font-size: 1rem; font-weight: 600; text-align: center; }
+    p.hint { font-size: 0.8rem; color: #888; text-align: center; }
+    output { font-size: 0.85rem; color: #555; min-height: 1.4em; text-align: center; }
+
+    /* Example-specific overrides */
+    #moon-btn { --msb-font-size: 2.5rem; --msb-size: 4rem; }
+    #flag-btn { --msb-size: 4rem; --msb-font-size: 2.5rem; --msb-border: 2px solid #e0e0e0; }
+    #img-btn  { --msb-size: 5rem; --msb-border: none; --msb-shadow: none; --msb-bg: transparent; }
+  </style>
+</head>
+<body>
+
+  <!-- Example 1: Emoji cycle (moon phases) -->
+  <section>
+    <h2>Moon phases</h2>
+    <span id="moon-btn"></span>
+    <output id="moon-out"></output>
+    <p class="hint">Click or tap to advance</p>
+  </section>
+
+  <!-- Example 2: Country flags -->
+  <section>
+    <h2>Country flags</h2>
+    <span id="flag-btn"></span>
+    <output id="flag-out"></output>
+    <p class="hint">Click or tap to advance</p>
+  </section>
+
+  <!-- Example 3: Image URLs (toggle icon) -->
+  <section>
+    <h2>On / Off toggle</h2>
+    <span id="img-btn"></span>
+    <output id="img-out">Status: off</output>
+    <p class="hint">Click or tap to toggle</p>
+  </section>
+
+  <script src="../components/multi-state-button/MultiStateButton.js"></script>
+  <script>
+    // ── Moon phases ──────────────────────────────────────────────────────────
+    const moonBtn = new MultiStateButton('#moon-btn', {
+      states: [
+        { content: '🌑', label: 'New moon'            },
+        { content: '🌒', label: 'Waxing crescent moon' },
+        { content: '🌓', label: 'First quarter moon'  },
+        { content: '🌔', label: 'Waxing gibbous moon' },
+        { content: '🌕', label: 'Full moon'           },
+        { content: '🌖', label: 'Waning gibbous moon' },
+        { content: '🌗', label: 'Last quarter moon'   },
+        { content: '🌘', label: 'Waning crescent moon'},
+      ],
+      onChange: (i, s) => {
+        document.getElementById('moon-out').textContent =
+          `State ${i + 1}/8 — ${s.label}`;
+      },
+    });
+
+    // ── Country flags ────────────────────────────────────────────────────────
+    const flagBtn = new MultiStateButton('#flag-btn', {
+      states: [
+        { content: '🇺🇸', label: 'United States' },
+        { content: '🇬🇧', label: 'United Kingdom' },
+        { content: '🇩🇪', label: 'Germany'        },
+        { content: '🇯🇵', label: 'Japan'          },
+        { content: '🇧🇷', label: 'Brazil'         },
+        { content: '🇦🇺', label: 'Australia'      },
+      ],
+      onChange: (i, s) => {
+        document.getElementById('flag-out').textContent = s.label;
+      },
+    });
+
+    // ── On/Off images ────────────────────────────────────────────────────────
+    // Uses publicly available SVG icons via unpkg
+    const imgBtn = new MultiStateButton('#img-btn', {
+      states: [
+        {
+          content: 'https://api.iconify.design/mdi/toggle-switch-off-outline.svg?color=%23aaa&width=80',
+          label:   'Off',
+        },
+        {
+          content: 'https://api.iconify.design/mdi/toggle-switch.svg?color=%234caf50&width=80',
+          label:   'On',
+        },
+      ],
+      initialIndex: 0,
+      onChange: (i, s) => {
+        document.getElementById('img-out').textContent = `Status: ${s.label.toLowerCase()}`;
+      },
+    });
+  </script>
+
+</body>
+</html>
