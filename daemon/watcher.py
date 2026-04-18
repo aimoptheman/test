@@ -3,26 +3,32 @@
 GitHub -> OpenHands Workflow Daemon
 
 Polls GitHub for issue activity across all repos owned by GITHUB_USER.
-When a new or updated issue is detected it fires a "run workflow" conversation
-against the local OpenHands server.  No external endpoint needed.
+When a new or updated issue is detected, triggers a local OpenHands run.
 
-Configure via environment variables or a .env file in the same directory:
+Two trigger modes — set one in .env:
 
-  GITHUB_TOKEN      GitHub PAT with issues:read scope        (required)
-  GITHUB_USER       GitHub username / org to watch           (default: aimoptheman)
-  OPENHANDS_URL     Local OpenHands base URL                 (default: http://localhost:3000)
-  POLL_INTERVAL     Seconds between GitHub polls             (default: 60)
-  COOLDOWN          Min seconds between OpenHands triggers   (default: 300)
-  STATE_FILE        Path for persisted issue state           (default: .daemon_state.json)
+  TRIGGER_CMD   Shell command to run (for CLI / Docker mode)
+                e.g.  docker run --rm -e LLM_API_KEY=... openhands/openhands:latest \\
+                        python -m openhands.core.main -t "run workflow"
 
-Usage:
-  python watcher.py
-  POLL_INTERVAL=30 python watcher.py
+  OPENHANDS_URL HTTP API base URL (for server / GUI mode)
+                e.g.  http://localhost:3000
+
+If both are set, TRIGGER_CMD takes priority.
+
+Other env vars (via .env or environment):
+
+  GITHUB_TOKEN      GitHub PAT with repo scope    (required)
+  GITHUB_USER       GitHub username / org          (default: aimoptheman)
+  POLL_INTERVAL     Seconds between polls          (default: 60)
+  COOLDOWN          Min seconds between triggers   (default: 300)
+  STATE_FILE        Path for persisted state       (default: .daemon_state.json)
 """
 
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
 import urllib.error
@@ -33,7 +39,6 @@ from pathlib import Path
 # ── Config ─────────────────────────────────────────────────────────────────────
 
 def _env(key: str, default: str = '') -> str:
-    # check a sibling .env file first, then os.environ
     env_file = Path(__file__).parent / '.env'
     if env_file.exists():
         for line in env_file.read_text().splitlines():
@@ -48,7 +53,8 @@ def _env(key: str, default: str = '') -> str:
 
 GITHUB_TOKEN  = _env('GITHUB_TOKEN')
 GITHUB_USER   = _env('GITHUB_USER', 'aimoptheman')
-OPENHANDS_URL = _env('OPENHANDS_URL', 'http://localhost:3000')
+OPENHANDS_URL = _env('OPENHANDS_URL', '')
+TRIGGER_CMD   = _env('TRIGGER_CMD', '')
 POLL_INTERVAL = int(_env('POLL_INTERVAL', '60'))
 COOLDOWN      = int(_env('COOLDOWN', '300'))
 STATE_FILE    = Path(_env('STATE_FILE', str(Path(__file__).parent / '.daemon_state.json')))
@@ -118,16 +124,44 @@ def save_state(state: dict) -> None:
     STATE_FILE.write_text(json.dumps(state, indent=2))
 
 
-# ── OpenHands trigger ──────────────────────────────────────────────────────────
+# ── Trigger ────────────────────────────────────────────────────────────────────
 
-def trigger_openhands(reason: str, state: dict) -> bool:
+def trigger(reason: str, state: dict) -> bool:
     since = time.time() - state.get('last_trigger', 0.0)
     if since < COOLDOWN:
-        remaining = int(COOLDOWN - since)
-        log.info(f'Cooldown: {remaining}s left — skipping trigger ({reason})')
+        log.info(f'Cooldown: {int(COOLDOWN - since)}s left — skipping ({reason})')
         return False
 
-    log.info(f'Triggering OpenHands — {reason}')
+    if TRIGGER_CMD:
+        return _trigger_cmd(reason, state)
+    elif OPENHANDS_URL:
+        return _trigger_http(reason, state)
+    else:
+        log.error('Neither TRIGGER_CMD nor OPENHANDS_URL is set in .env')
+        return False
+
+
+def _trigger_cmd(reason: str, state: dict) -> bool:
+    log.info(f'Running trigger command — {reason}')
+    log.info(f'  $ {TRIGGER_CMD}')
+    try:
+        # Run detached so the daemon keeps polling while OpenHands works
+        subprocess.Popen(
+            TRIGGER_CMD,
+            shell=True,
+            stdout=open(Path(__file__).parent / 'openhands.log', 'a'),
+            stderr=subprocess.STDOUT,
+        )
+        log.info('Process launched (output -> daemon/openhands.log)')
+        state['last_trigger'] = time.time()
+        return True
+    except Exception as e:
+        log.error(f'Failed to launch trigger command: {e}')
+        return False
+
+
+def _trigger_http(reason: str, state: dict) -> bool:
+    log.info(f'Triggering OpenHands via HTTP — {reason}')
     body = json.dumps({'initial_user_msg': TASK_MSG}).encode()
     req = urllib.request.Request(
         f'{OPENHANDS_URL}/api/conversations',
@@ -138,20 +172,17 @@ def trigger_openhands(reason: str, state: dict) -> bool:
     try:
         with urllib.request.urlopen(req, timeout=15) as r:
             resp = json.load(r)
-            cid = resp.get('conversation_id', '(no id)')
-            log.info(f'Conversation started: {cid}')
+            log.info(f'Conversation started: {resp.get("conversation_id", resp)}')
             state['last_trigger'] = time.time()
             return True
     except urllib.error.HTTPError as e:
-        body_text = e.read().decode()[:300]
-        log.error(f'OpenHands returned HTTP {e.code}: {body_text}')
+        log.error(f'OpenHands HTTP {e.code}: {e.read().decode()[:300]}')
     except Exception as e:
         log.error(f'Could not reach OpenHands at {OPENHANDS_URL}: {e}')
-        log.error('  Is OpenHands running?  Check OPENHANDS_URL in .env')
     return False
 
 
-# ── Diff helper ────────────────────────────────────────────────────────────────
+# ── Diff ───────────────────────────────────────────────────────────────────────
 
 def diff(current: dict[str, str], previous: dict[str, str]) -> list[str]:
     changes = []
@@ -170,15 +201,20 @@ def diff(current: dict[str, str], previous: dict[str, str]) -> list[str]:
 
 def main() -> None:
     if not GITHUB_TOKEN:
-        log.error('GITHUB_TOKEN is not set. Add it to daemon/.env or export it.')
+        log.error('GITHUB_TOKEN is not set.')
+        sys.exit(1)
+    if not TRIGGER_CMD and not OPENHANDS_URL:
+        log.error('Set either TRIGGER_CMD or OPENHANDS_URL in daemon/.env')
+        log.error('  CLI/Docker mode  ->  TRIGGER_CMD=docker run ...')
+        log.error('  Server/GUI mode  ->  OPENHANDS_URL=http://localhost:3000')
         sys.exit(1)
 
+    mode = f'CMD: {TRIGGER_CMD[:60]}' if TRIGGER_CMD else f'HTTP: {OPENHANDS_URL}'
     log.info('OpenHands workflow daemon starting')
     log.info(f'  GitHub user : {GITHUB_USER}')
-    log.info(f'  OpenHands   : {OPENHANDS_URL}')
+    log.info(f'  Trigger     : {mode}')
     log.info(f'  Poll every  : {POLL_INTERVAL}s')
     log.info(f'  Cooldown    : {COOLDOWN}s between triggers')
-    log.info(f'  State file  : {STATE_FILE}')
 
     state = load_state()
     first_run = not state['issues']
@@ -186,7 +222,6 @@ def main() -> None:
     while True:
         try:
             current = fetch_open_issues()
-
             if first_run:
                 log.info(f'First run — seeding {len(current)} issue(s), no trigger fired')
                 state['issues'] = current
@@ -197,12 +232,11 @@ def main() -> None:
                 if changes:
                     for c in changes:
                         log.info(f'  {c}')
-                    trigger_openhands('; '.join(changes), state)
+                    trigger('; '.join(changes), state)
                     state['issues'] = current
                     save_state(state)
                 else:
-                    log.debug(f'Polled {len(current)} issue(s) — no changes')
-
+                    log.info(f'Polled {len(current)} issue(s) — no changes')
         except Exception as e:
             log.error(f'Poll error: {e}')
 
