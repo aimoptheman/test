@@ -37,11 +37,29 @@ are documented in `aimoptheman/domains` only — no individual repo.
 
 ## Domain POCs (on aimoptheman/test GitHub Pages)
 
-| Domain | POC URL |
-|--------|---------|
-| gptvshuman.com | https://aimoptheman.github.io/test/poc/gptvshuman/ |
-| youveneverbean.com | https://aimoptheman.github.io/test/poc/youveneverbean/ |
-| hivemind.trading | https://aimoptheman.github.io/test/poc/hivemind-trading/ |
+| Domain | POC URL | Expires |
+|--------|---------|---------|
+| gptvshuman.com | https://aimoptheman.github.io/test/poc/gptvshuman/ | Apr 21 🔴 |
+| gptdebates.com | https://aimoptheman.github.io/test/poc/gptdebates/ | Apr 21 🔴 |
+| youveneverbean.com | https://aimoptheman.github.io/test/poc/youveneverbean/ | Apr 22 🔴 |
+| hivemind.trading | https://aimoptheman.github.io/test/poc/hivemind-trading/ | May 31 |
+| copytradinghub.com | https://aimoptheman.github.io/test/poc/copytradinghub/ | May 31 |
+
+## Automation
+
+### GitHub → OpenHands Daemon (`daemon/watcher.py`)
+
+A local polling daemon that watches all GitHub repos for issue changes and
+triggers local OpenHands automatically. No external endpoint needed.
+
+- **Setup**: `cd daemon && cp .env.example .env` — fill in `GITHUB_TOKEN`
+- **Run**: `python3 daemon/watcher.py`
+- **Service**: launchd plist (macOS) and systemd unit (Linux) are in `daemon/`
+- **Docs**: `daemon/README.md`
+
+The daemon POSTs `{"initial_user_msg": "run workflow"}` to `OPENHANDS_URL/api/conversations`
+whenever a new or updated issue is detected. A cooldown (default 300 s) prevents
+re-triggering while a workflow run is still in progress.
 
 ## Agent Workflow
 
