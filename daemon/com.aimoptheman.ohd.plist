@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.aimoptheman.ohd</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <!-- !! Update these two paths to match your system !! -->
+    <string>/usr/local/bin/python3</string>
+    <string>/path/to/daemon/watcher.py</string>
+  </array>
+
+  <!-- Keep alive: relaunch if it crashes -->
+  <key>KeepAlive</key>
+  <true/>
+
+  <!-- Start at login -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/ohd.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/tmp/ohd.log</string>
+</dict>
+</plist>
