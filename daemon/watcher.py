@@ -83,7 +83,7 @@ def fetch_open_issues() -> dict[str, str]:
     result: dict[str, str] = {}
     page = 1
     while True:
-        repos = _gh(f'/users/{GITHUB_USER}/repos?per_page=100&page={page}&type=owner')
+        repos = _gh(f'/user/repos?per_page=100&page={page}&type=owner')
         if not repos:
             break
         for repo in repos:
