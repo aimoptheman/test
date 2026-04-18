@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenHands GitHub Workflow Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# !! Update ExecStart and WorkingDirectory to match your system !!
+ExecStart=/usr/bin/python3 /path/to/daemon/watcher.py
+WorkingDirectory=/path/to/daemon
+Restart=on-failure
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
